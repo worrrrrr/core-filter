@@ -2,29 +2,37 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Core Filter | Final Release</title>
+    <title>Core Filter | Analysis Report</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        #app { width: 90%; max-width: 500px; text-align: center; padding: 20px; }
-        .btn { display: block; width: 100%; padding: 20px; margin: 10px 0; background: #111; border: 1px solid #333; color: #fff; font-size: 1.1rem; cursor: pointer; border-radius: 8px; text-align: left; }
-        .btn:hover { border-color: #bb86fc; background: #1a1a1a; }
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        #app { width: 90%; max-width: 500px; text-align: center; }
+        
+        .btn { display: block; width: 100%; padding: 18px; margin: 12px 0; background: #000; border: 1px solid #333; color: #888; font-size: 1rem; cursor: pointer; border-radius: 4px; text-align: left; transition: 0.3s; }
+        .btn:hover { border-color: #bb86fc; color: #fff; background: #0a0a0a; }
+        
         .hidden { display: none; }
-        h2 { font-size: 1.4rem; line-height: 1.5; margin-bottom: 25px; text-align: left; }
-        #result-screen { border: 2px solid #bb86fc; padding: 30px; border-radius: 15px; background: #0a0a0a; }
-        .type-tag { font-size: 3rem; color: #bb86fc; font-weight: bold; margin: 10px 0; }
-        .desc { font-size: 1.1rem; color: #ccc; line-height: 1.6; margin-bottom: 20px; }
+        h1 { font-weight: 300; letter-spacing: 4px; color: #fff; }
+        h2 { font-size: 1.1rem; font-weight: 300; line-height: 1.6; margin-bottom: 30px; text-align: left; color: #ccc; }
+        
+        #result-screen { border-top: 1px solid #333; padding: 40px 10px; }
+        .header-text { font-size: 0.75rem; color: #555; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .type-tag { font-size: 3.5rem; color: #bb86fc; font-weight: 200; letter-spacing: 10px; margin: 10px 0; }
+        
+        .analysis-box { font-size: 1.05rem; color: #aaa; line-height: 1.8; margin-top: 30px; text-align: left; font-weight: 300; }
+        .point { margin-bottom: 15px; border-left: 2px solid #bb86fc; padding-left: 15px; }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div id="start-screen">
-        <h1 style="letter-spacing: 5px;">CORE FILTER</h1>
-        <p style="color:#888">เจาะลึกเลนส์ที่คุณใช้มองโลก</p>
-        <button class="btn" style="text-align:center" onclick="startQuiz()">เริ่มการทดสอบ</button>
+        <h1>CORE FILTER</h1>
+        <p style="color:#444; font-size: 0.9rem;">OBJECTIVE PERSONALITY ANALYSIS</p>
+        <button class="btn" style="text-align:center" onclick="startQuiz()">เริ่มวิเคราะห์ตัวตน (12 ค่าน้ำหนัก)</button>
     </div>
 
     <div id="quiz-screen" class="hidden">
+        <div class="header-text" id="q-progress">STEP 1 OF 12</div>
         <h2 id="q-text">คำถาม</h2>
         <div id="options">
             <button class="btn" onclick="handleAnswer('A')" id="optA"></button>
@@ -33,25 +41,56 @@
     </div>
 
     <div id="result-screen" class="hidden">
-        <div style="font-size: 0.9rem; color: #888;">เนื้อแท้ของคุณคือ</div>
+        <div class="header-text">Final Analysis Report</div>
         <div id="res-type" class="type-tag"></div>
-        <p id="res-desc" class="desc"></p>
-        <div id="res-truth" style="color: #ff0266; font-weight: bold; border-top: 1px solid #333; padding-top: 20px;"></div>
-        <button class="btn" style="text-align:center; margin-top:30px; border-color:#444" onclick="location.reload()">ทดสอบใหม่อีกครั้ง</button>
+        <div id="res-roast" class="analysis-box"></div>
+        <button class="btn" style="text-align:center; margin-top:40px; border-color:#222; font-size:0.8rem;" onclick="location.reload()">TERMINATE & RESTART</button>
     </div>
 </div>
 
 <script>
-    // ชุดคำถามที่ครอบคลุม 4 แกนหลัก (E/I, N/S, T/F, J/P)
     const questions = [
-        { q: "คุณชาร์จพลังงานด้วยวิธีไหน?", a: "ออกไปเจอโลกและผู้คน (E)", b: "อยู่เงียบๆ กับความคิดตัวเอง (I)" },
-        { q: "เวลาประมวลผลข้อมูล คุณเชื่ออะไร?", a: "สัญชาตญาณและภาพรวม (N)", b: "รายละเอียดและข้อเท็จจริง (S)" },
-        { q: "เวลาตัดสินใจ คุณใช้อะไรนำทาง?", a: "ตรรกะและความสมเหตุสมผล (T)", b: "ความรู้สึกและความเห็นอกเห็นใจ (F)" },
-        { q: "คุณชอบใช้ชีวิตแบบไหนมากกว่า?", a: "วางแผนไว้ล่วงหน้าชัดเจน (J)", b: "ยืดหยุ่น ปรับไปตามหน้างาน (P)" }
+        { q: "เมื่อเผชิญกับสถานการณ์ที่ไม่คาดคิด คุณตอบสนองอย่างไร?", a: "ใช้สัญชาตญาณมองหาภาพรวม (N)", b: "ใช้ข้อมูลจากสิ่งที่เคยเกิดขึ้นจริง (S)", axis: "NS" },
+        { q: "คุณให้ความสำคัญกับสิ่งใดมากกว่าในการทำงาน?", a: "ตรรกะและความถูกต้องของระบบ (T)", b: "ความพึงพอใจและรักษาความสัมพันธ์ (F)", axis: "TF" },
+        { q: "วิธีการรับพลังงานของคุณคือการ...", a: "ปฏิสัมพันธ์กับสิ่งแวดล้อมภายนอก (E)", b: "สะท้อนความคิดอยู่ภายในตนเอง (I)", axis: "EI" },
+        { q: "รูปแบบการใช้ชีวิตที่คุณเป็นอยู่...", a: "เน้นการวางโครงสร้างและขอบเขต (J)", b: "เน้นการเปิดรับและความยืดหยุ่น (P)", axis: "JP" },
+        // ... (เพิ่มข้อที่เหลือให้ครบ 12 ข้อตามชุดที่คุยกัน) ...
     ];
 
+    // เพิ่มข้อ 5-12 เพื่อความแม่นยำ
+    const extraQuestions = [
+        { q: "ในการแก้ไขปัญหา คุณเชื่อมั่นใน...", a: "ไอเดียใหม่ที่ยังไม่เคยถูกใช้ (N)", b: "วิธีการที่พิสูจน์แล้วว่าได้ผล (S)", axis: "NS" },
+        { q: "การตัดสินใจของคุณมักจะ...", a: "เด็ดขาดและตรงไปตรงมา (T)", b: "ประนีประนอมและนุ่มนวล (F)", axis: "TF" },
+        { q: "คุณเลือกที่จะ...", a: "แสดงออกทันทีที่คิด (E)", b: "คิดทบทวนก่อนจะพูด (I)", axis: "EI" },
+        { q: "ระเบียบวินัยสำหรับคุณคือ...", a: "สิ่งที่ต้องยึดถือเพื่อความสำเร็จ (J)", b: "สิ่งที่ปรับเปลี่ยนได้ตามสถานการณ์ (P)", axis: "JP" },
+        { q: "คุณมักจะจดจำสิ่งใดได้ดีกว่า?", a: "ใจความสำคัญและความหมาย (N)", b: "ลำดับเหตุการณ์และรายละเอียด (S)", axis: "NS" },
+        { q: "คำวิจารณ์มีผลกับคุณอย่างไร?", a: "พิจารณาตามข้อเท็จจริง (T)", b: "สะเทือนถึงความรู้สึกส่วนตัว (F)", axis: "TF" },
+        { q: "สังคมที่ตอบโจทย์คุณคือ...", a: "กลุ่มที่เต็มไปด้วยกิจกรรม (E)", b: "กลุ่มเล็กๆ ที่พูดคุยเชิงลึก (I)", axis: "EI" },
+        { q: "แผนการเดินทางของคุณมักจะเป็นแบบ...", a: "กำหนดจุดแวะพักชัดเจน (J)", b: "ไปถึงที่นั่นแล้วค่อยว่ากัน (P)", axis: "JP" }
+    ];
+
+    const allQuestions = [...questions, ...extraQuestions];
     let current = 0;
-    let results = { E:0, I:0, N:0, S:0, T:0, F:0, J:0, P:0 };
+    let scores = { E:0, I:0, N:0, S:0, T:0, F:0, J:0, P:0 };
+
+    const roasts = {
+        "INTJ": "คุณไม่ได้ฉลาดเหนือชั้นอย่างที่คิด แต่เป็นเพียงกลไกการป้องกันตนเองที่สร้างภาพลักษณ์อัจฉริยะขึ้นมาเพื่อชดเชยทักษะทางสังคมที่บกพร่อง",
+        "INFJ": "การยึดติดกับตัวเลข 1% ไม่ได้ทำให้คุณพิเศษ ความอ่อนไหวที่มากเกินไปและอัตตาที่แบกไว้นั้นเป็นเพียงกำแพงที่ขวางกั้นคุณจากความเป็นจริง",
+        "INTP": "ตรรกะที่คุณภาคภูมิใจมักถูกใช้เป็นข้ออ้างเพื่อหลีกเลี่ยงความรับผิดชอบในโลกจริง ความฉลาดที่ไร้การลงมือทำก็คือความว่างเปล่า",
+        "INFP": "อุดมการณ์ที่สวยงามของคุณคือเกราะกำบังความเอาแต่ใจ การยึดความรู้สึกตนเองเป็นศูนย์กลางมักทำให้คุณมองข้ามความเป็นธรรมต่อผู้อื่น",
+        "ISTJ": "ระเบียบวินัยของคุณคือความกลัวที่จะสูญเสียการควบคุม คุณไม่ใช่ผู้รักษาความถูกต้อง แต่เป็นเพียงทาสของความเคยชินที่ไร้จินตนาการ",
+        "ISFJ": "ความใจดีที่คุณแสดงออกมักแฝงไปด้วยความต้องการถูกยอมรับ คุณทำเพื่อคนอื่นเพียงเพราะกลัวการไม่มีตัวตนในสายตาคนรอบข้าง",
+        "ISTP": "ความเย็นชาไม่ใช่ความเท่ แต่เป็นความขัดเขินทางอารมณ์ที่คุณจัดการไม่ได้ คุณจึงเลือกอยู่กับวัตถุมากกว่าที่จะทำความเข้าใจมนุษย์",
+        "ISFP": "ความเป็นศิลปินของคุณมักเป็นเพียงคำนิยามที่ใช้กลบเกลื่อนความไม่มีจุดยืน คุณไหลไปตามอารมณ์ชั่ววูบและเรียกมันว่าอิสระ",
+        "ENTJ": "วิสัยทัศน์ผู้นำของคุณมักเป็นเพียงการบงการเพื่อลบปมด้อยในอดีต คุณมองคนอื่นเป็นเครื่องมือเพราะลึกๆ คุณไม่เคยไว้ใจใครได้เลย",
+        "ENFJ": "การช่วยเหลือผู้อื่นของคุณคือการควบคุมทางอ้อม คุณเสพติดการเป็นที่รักจนไม่สามารถยอมรับความจริงที่ว่าโลกนี้ไม่ได้หมุนรอบตัวคุณ",
+        "ENTP": "ความช่างสงสัยของคุณมักจบลงที่การกวนประสาทอย่างไร้จุดหมาย คุณเถียงเพื่อความสะใจมากกว่าจะหาความจริง เพราะคุณกลัวการต้องลงมือทำ",
+        "ENFP": "พลังงานบวกของคุณมักเป็นหน้ากากปิดบังความสับสน การวิ่งหาความตื่นเต้นใหม่ๆ คือการหนีความรับผิดชอบที่คุณไม่อาจเผชิญหน้าได้",
+        "ESTJ": "กฎเกณฑ์ที่คุณบังคับใช้คือการระบายความโกรธแค้นที่คุณมีต่อความไม่สมบูรณ์แบบของตัวเอง คุณไม่ใช่ผู้บริหาร แต่เป็นจอมบงการที่ขาดความเข้าใจ",
+        "ESFJ": "ความห่วงใยของคุณมักเป็นเครื่องมือตรวจสอบสังคม คุณใช้ความสนิทสนมเพื่อควบคุมข้อมูลและกดดันให้ผู้อื่นอยู่ในกรอบที่คุณต้องการ",
+        "ESTP": "ความกล้าหาญของคุณมักเป็นเพียงความบุ่มบ่ามที่ไร้การยั้งคิด คุณใช้ชีวิตบนความเสี่ยงเพื่อหนีจากความโดดเดี่ยวที่กัดกินใจคุณอยู่ภายใน",
+        "ESFP": "ความร่าเริงของคุณคือเสียงหัวเราะที่กลบเกลื่อนความเหงา คุณต้องการแสงไฟเพราะลึกๆ คุณกลัวว่าถ้าไม่มีคนดู คุณจะไม่มีค่าอะไรเลย"
+    };
 
     function startQuiz() {
         document.getElementById('start-screen').classList.add('hidden');
@@ -60,22 +99,19 @@
     }
 
     function renderQuestion() {
-        if (current >= questions.length) {
-            renderResult();
-            return;
-        }
-        const q = questions[current];
-        document.getElementById('q-text').innerText = (current + 1) + ". " + q.q;
+        if (current >= allQuestions.length) { renderResult(); return; }
+        const q = allQuestions[current];
+        document.getElementById('q-progress').innerText = `ANALYZING STEP ${current + 1} OF 12`;
+        document.getElementById('q-text').innerText = q.q;
         document.getElementById('optA').innerText = q.a;
         document.getElementById('optB').innerText = q.b;
     }
 
     function handleAnswer(choice) {
-        const q = questions[current];
+        const q = allQuestions[current];
         const selected = choice === 'A' ? q.a : q.b;
         const letter = selected.match(/\((.)\)/)[1];
-        
-        results[letter]++;
+        scores[letter]++;
         current++;
         renderQuestion();
     }
@@ -83,39 +119,145 @@
     function renderResult() {
         document.getElementById('quiz-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
-
-        // สรุปไทป์จากแต้ม
         let type = "";
-        type += results.E >= results.I ? "E" : "I";
-        type += results.N >= results.S ? "N" : "S";
-        type += results.T >= results.F ? "T" : "F";
-        type += results.J >= results.P ? "J" : "P";
-
-        const typeInfo = {
-            "INTJ": { desc: "นักวางกลยุทธ์ผู้มองการณ์ไกล", truth: "ทนไม่ได้กับความไม่สมเหตุสมผล" },
-            "INFJ": { desc: "ผู้หยั่งรู้ที่มีอุดมการณ์แรงกล้า", truth: "ทนไม่ได้กับการฉาบฉวยและไร้ความหมาย" },
-            "INTP": { desc: "นักคิดวิเคราะห์ผู้รักความถูกต้อง", truth: "ทนไม่ได้กับตรรกะวิบัติ" },
-            "INFP": { desc: "นักฝันผู้ซื่อสัตย์ต่อจิตวิญญาณ", truth: "ทนไม่ได้กับการต้องสวมหน้ากาก" },
-            "ISTJ": { desc: "ผู้รักษาความถูกต้องและระเบียบวินัย", truth: "ทนไม่ได้กับความสะเพร่า" },
-            "ISFJ": { desc: "ผู้พิทักษ์ที่ใส่ใจทุกรายละเอียด", truth: "ทนไม่ได้กับการอกตัญญู" },
-            "ISTP": { desc: "นักประดิษฐ์ผู้เงียบขรึมและสมจริง", truth: "ทนไม่ได้กับการถูกบงการ" },
-            "ISFP": { desc: "ศิลปินผู้รักอิสระและปัจจุบันกาล", truth: "ทนไม่ได้กับการถูกจำกัดตัวตน" },
-            "ENTJ": { desc: "ผู้นำผู้เด็ดขาดและบ้าพลัง", truth: "ทนไม่ได้กับความขี้เกียจ" },
-            "ENFJ": { desc: "ผู้สร้างแรงบันดาลใจให้มวลชน", truth: "ทนไม่ได้กับการเห็นคนถูกทอดทิ้ง" },
-            "ENTP": { desc: "นักโต้วาทีผู้ทลายกรอบเดิมๆ", truth: "ทนไม่ได้กับความน่าเบื่อซ้ำซาก" },
-            "ENFP": { desc: "นักสร้างสรรค์ผู้จุดประกายความเป็นไปได้", truth: "ทนไม่ได้กับการถูกขังในกรอบ" },
-            "ESTJ": { desc: "ผู้บริหารที่เน้นผลลัพธ์และความจริง", truth: "ทนไม่ได้กับความไร้ประสิทธิภาพ" },
-            "ESFJ": { desc: "ผู้ดูแลสังคมและสร้างมิตรภาพ", truth: "ทนไม่ได้กับการถูกมองข้าม" },
-            "ESTP": { desc: "นักลุยที่กล้าได้กล้าเสีย", truth: "ทนไม่ได้กับการนั่งรอเฉยๆ" },
-            "ESFP": { desc: "ผู้สร้างความบันเทิงและพลังบวก", truth: "ทนไม่ได้กับบรรยากาศที่ตึงเครียด" }
-        };
-
+        type += scores.E >= scores.I ? "E" : "I";
+        type += scores.N >= scores.S ? "N" : "S";
+        type += scores.T >= scores.F ? "T" : "F";
+        type += scores.J >= scores.P ? "J" : "P";
         document.getElementById('res-type').innerText = type;
-        document.getElementById('res-desc').innerText = typeInfo[type].desc;
-        document.getElementById('res-truth').innerText = "CORE TRUTH: " + typeInfo[type].truth;
+        document.getElementById('res-roast').innerHTML = `<div class="point">${roasts[type]}</div>`;
     }
 </script>
-
 </body>
-</html>
+</html><!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Core Filter | Analysis Report</title>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        #app { width: 90%; max-width: 500px; text-align: center; }
+        
+        .btn { display: block; width: 100%; padding: 18px; margin: 12px 0; background: #000; border: 1px solid #333; color: #888; font-size: 1rem; cursor: pointer; border-radius: 4px; text-align: left; transition: 0.3s; }
+        .btn:hover { border-color: #bb86fc; color: #fff; background: #0a0a0a; }
+        
+        .hidden { display: none; }
+        h1 { font-weight: 300; letter-spacing: 4px; color: #fff; }
+        h2 { font-size: 1.1rem; font-weight: 300; line-height: 1.6; margin-bottom: 30px; text-align: left; color: #ccc; }
+        
+        #result-screen { border-top: 1px solid #333; padding: 40px 10px; }
+        .header-text { font-size: 0.75rem; color: #555; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .type-tag { font-size: 3.5rem; color: #bb86fc; font-weight: 200; letter-spacing: 10px; margin: 10px 0; }
+        
+        .analysis-box { font-size: 1.05rem; color: #aaa; line-height: 1.8; margin-top: 30px; text-align: left; font-weight: 300; }
+        .point { margin-bottom: 15px; border-left: 2px solid #bb86fc; padding-left: 15px; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="start-screen">
+        <h1>CORE FILTER</h1>
+        <p style="color:#444; font-size: 0.9rem;">OBJECTIVE PERSONALITY ANALYSIS</p>
+        <button class="btn" style="text-align:center" onclick="startQuiz()">เริ่มวิเคราะห์ตัวตน (12 ค่าน้ำหนัก)</button>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <div class="header-text" id="q-progress">STEP 1 OF 12</div>
+        <h2 id="q-text">คำถาม</h2>
+        <div id="options">
+            <button class="btn" onclick="handleAnswer('A')" id="optA"></button>
+            <button class="btn" onclick="handleAnswer('B')" id="optB"></button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="hidden">
+        <div class="header-text">Final Analysis Report</div>
+        <div id="res-type" class="type-tag"></div>
+        <div id="res-roast" class="analysis-box"></div>
+        <button class="btn" style="text-align:center; margin-top:40px; border-color:#222; font-size:0.8rem;" onclick="location.reload()">TERMINATE & RESTART</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "เมื่อเผชิญกับสถานการณ์ที่ไม่คาดคิด คุณตอบสนองอย่างไร?", a: "ใช้สัญชาตญาณมองหาภาพรวม (N)", b: "ใช้ข้อมูลจากสิ่งที่เคยเกิดขึ้นจริง (S)", axis: "NS" },
+        { q: "คุณให้ความสำคัญกับสิ่งใดมากกว่าในการทำงาน?", a: "ตรรกะและความถูกต้องของระบบ (T)", b: "ความพึงพอใจและรักษาความสัมพันธ์ (F)", axis: "TF" },
+        { q: "วิธีการรับพลังงานของคุณคือการ...", a: "ปฏิสัมพันธ์กับสิ่งแวดล้อมภายนอก (E)", b: "สะท้อนความคิดอยู่ภายในตนเอง (I)", axis: "EI" },
+        { q: "รูปแบบการใช้ชีวิตที่คุณเป็นอยู่...", a: "เน้นการวางโครงสร้างและขอบเขต (J)", b: "เน้นการเปิดรับและความยืดหยุ่น (P)", axis: "JP" },
+        // ... (เพิ่มข้อที่เหลือให้ครบ 12 ข้อตามชุดที่คุยกัน) ...
+    ];
+
+    // เพิ่มข้อ 5-12 เพื่อความแม่นยำ
+    const extraQuestions = [
+        { q: "ในการแก้ไขปัญหา คุณเชื่อมั่นใน...", a: "ไอเดียใหม่ที่ยังไม่เคยถูกใช้ (N)", b: "วิธีการที่พิสูจน์แล้วว่าได้ผล (S)", axis: "NS" },
+        { q: "การตัดสินใจของคุณมักจะ...", a: "เด็ดขาดและตรงไปตรงมา (T)", b: "ประนีประนอมและนุ่มนวล (F)", axis: "TF" },
+        { q: "คุณเลือกที่จะ...", a: "แสดงออกทันทีที่คิด (E)", b: "คิดทบทวนก่อนจะพูด (I)", axis: "EI" },
+        { q: "ระเบียบวินัยสำหรับคุณคือ...", a: "สิ่งที่ต้องยึดถือเพื่อความสำเร็จ (J)", b: "สิ่งที่ปรับเปลี่ยนได้ตามสถานการณ์ (P)", axis: "JP" },
+        { q: "คุณมักจะจดจำสิ่งใดได้ดีกว่า?", a: "ใจความสำคัญและความหมาย (N)", b: "ลำดับเหตุการณ์และรายละเอียด (S)", axis: "NS" },
+        { q: "คำวิจารณ์มีผลกับคุณอย่างไร?", a: "พิจารณาตามข้อเท็จจริง (T)", b: "สะเทือนถึงความรู้สึกส่วนตัว (F)", axis: "TF" },
+        { q: "สังคมที่ตอบโจทย์คุณคือ...", a: "กลุ่มที่เต็มไปด้วยกิจกรรม (E)", b: "กลุ่มเล็กๆ ที่พูดคุยเชิงลึก (I)", axis: "EI" },
+        { q: "แผนการเดินทางของคุณมักจะเป็นแบบ...", a: "กำหนดจุดแวะพักชัดเจน (J)", b: "ไปถึงที่นั่นแล้วค่อยว่ากัน (P)", axis: "JP" }
+    ];
+
+    const allQuestions = [...questions, ...extraQuestions];
+    let current = 0;
+    let scores = { E:0, I:0, N:0, S:0, T:0, F:0, J:0, P:0 };
+
+    const roasts = {
+        "INTJ": "คุณไม่ได้ฉลาดเหนือชั้นอย่างที่คิด แต่เป็นเพียงกลไกการป้องกันตนเองที่สร้างภาพลักษณ์อัจฉริยะขึ้นมาเพื่อชดเชยทักษะทางสังคมที่บกพร่อง",
+        "INFJ": "การยึดติดกับตัวเลข 1% ไม่ได้ทำให้คุณพิเศษ ความอ่อนไหวที่มากเกินไปและอัตตาที่แบกไว้นั้นเป็นเพียงกำแพงที่ขวางกั้นคุณจากความเป็นจริง",
+        "INTP": "ตรรกะที่คุณภาคภูมิใจมักถูกใช้เป็นข้ออ้างเพื่อหลีกเลี่ยงความรับผิดชอบในโลกจริง ความฉลาดที่ไร้การลงมือทำก็คือความว่างเปล่า",
+        "INFP": "อุดมการณ์ที่สวยงามของคุณคือเกราะกำบังความเอาแต่ใจ การยึดความรู้สึกตนเองเป็นศูนย์กลางมักทำให้คุณมองข้ามความเป็นธรรมต่อผู้อื่น",
+        "ISTJ": "ระเบียบวินัยของคุณคือความกลัวที่จะสูญเสียการควบคุม คุณไม่ใช่ผู้รักษาความถูกต้อง แต่เป็นเพียงทาสของความเคยชินที่ไร้จินตนาการ",
+        "ISFJ": "ความใจดีที่คุณแสดงออกมักแฝงไปด้วยความต้องการถูกยอมรับ คุณทำเพื่อคนอื่นเพียงเพราะกลัวการไม่มีตัวตนในสายตาคนรอบข้าง",
+        "ISTP": "ความเย็นชาไม่ใช่ความเท่ แต่เป็นความขัดเขินทางอารมณ์ที่คุณจัดการไม่ได้ คุณจึงเลือกอยู่กับวัตถุมากกว่าที่จะทำความเข้าใจมนุษย์",
+        "ISFP": "ความเป็นศิลปินของคุณมักเป็นเพียงคำนิยามที่ใช้กลบเกลื่อนความไม่มีจุดยืน คุณไหลไปตามอารมณ์ชั่ววูบและเรียกมันว่าอิสระ",
+        "ENTJ": "วิสัยทัศน์ผู้นำของคุณมักเป็นเพียงการบงการเพื่อลบปมด้อยในอดีต คุณมองคนอื่นเป็นเครื่องมือเพราะลึกๆ คุณไม่เคยไว้ใจใครได้เลย",
+        "ENFJ": "การช่วยเหลือผู้อื่นของคุณคือการควบคุมทางอ้อม คุณเสพติดการเป็นที่รักจนไม่สามารถยอมรับความจริงที่ว่าโลกนี้ไม่ได้หมุนรอบตัวคุณ",
+        "ENTP": "ความช่างสงสัยของคุณมักจบลงที่การกวนประสาทอย่างไร้จุดหมาย คุณเถียงเพื่อความสะใจมากกว่าจะหาความจริง เพราะคุณกลัวการต้องลงมือทำ",
+        "ENFP": "พลังงานบวกของคุณมักเป็นหน้ากากปิดบังความสับสน การวิ่งหาความตื่นเต้นใหม่ๆ คือการหนีความรับผิดชอบที่คุณไม่อาจเผชิญหน้าได้",
+        "ESTJ": "กฎเกณฑ์ที่คุณบังคับใช้คือการระบายความโกรธแค้นที่คุณมีต่อความไม่สมบูรณ์แบบของตัวเอง คุณไม่ใช่ผู้บริหาร แต่เป็นจอมบงการที่ขาดความเข้าใจ",
+        "ESFJ": "ความห่วงใยของคุณมักเป็นเครื่องมือตรวจสอบสังคม คุณใช้ความสนิทสนมเพื่อควบคุมข้อมูลและกดดันให้ผู้อื่นอยู่ในกรอบที่คุณต้องการ",
+        "ESTP": "ความกล้าหาญของคุณมักเป็นเพียงความบุ่มบ่ามที่ไร้การยั้งคิด คุณใช้ชีวิตบนความเสี่ยงเพื่อหนีจากความโดดเดี่ยวที่กัดกินใจคุณอยู่ภายใน",
+        "ESFP": "ความร่าเริงของคุณคือเสียงหัวเราะที่กลบเกลื่อนความเหงา คุณต้องการแสงไฟเพราะลึกๆ คุณกลัวว่าถ้าไม่มีคนดู คุณจะไม่มีค่าอะไรเลย"
+    };
+
+    function startQuiz() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        if (current >= allQuestions.length) { renderResult(); return; }
+        const q = allQuestions[current];
+        document.getElementById('q-progress').innerText = `ANALYZING STEP ${current + 1} OF 12`;
+        document.getElementById('q-text').innerText = q.q;
+        document.getElementById('optA').innerText = q.a;
+        document.getElementById('optB').innerText = q.b;
+    }
+
+    function handleAnswer(choice) {
+        const q = allQuestions[current];
+        const selected = choice === 'A' ? q.a : q.b;
+        const letter = selected.match(/\((.)\)/)[1];
+        scores[letter]++;
+        current++;
+        renderQuestion();
+    }
+
+    function renderResult() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        let type = "";
+        type += scores.E >= scores.I ? "E" : "I";
+        type += scores.N >= scores.S ? "N" : "S";
+        type += scores.T >= scores.F ? "T" : "F";
+        type += scores.J >= scores.P ? "J" : "P";
+        document.getElementById('res-type').innerText = type;
+        document.getElementById('res-roast').innerHTML = `<div class="point">${roasts[type]}</div>`;
+    }
+</script>
+</body>
 </html>
