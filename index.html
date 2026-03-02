@@ -2,64 +2,90 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mistype Decoder | Dark Mode</title>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>Core Filter | Reality Check</title>
     <style>
-        :root {
-            --bg: #000000;
-            --card-bg: #111111;
-            --accent: #bb86fc;
-            --logic: #03dac6;
-            --error: #ff0266;
-            --text: #e1e1e1;
-        }
+        body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        #app { width: 90%; max-width: 600px; padding: 40px 0; }
+        .btn { display: block; width: 100%; padding: 20px; margin: 15px 0; background: #111; border: 1px solid #333; color: #fff; font-size: 1.2rem; cursor: pointer; border-radius: 8px; transition: 0.2s; text-align: left; }
+        .btn:hover { border-color: #bb86fc; background: #1a1a1a; }
+        h2 { font-size: 1.8rem; margin-bottom: 30px; line-height: 1.4; }
+        .result { display: none; text-align: center; }
+        .type-title { color: #bb86fc; font-size: 2.5rem; margin-bottom: 10px; }
+        .desc { font-size: 1.2rem; line-height: 1.6; color: #ccc; }
+        .kryptonite { border: 1px solid #ff0266; color: #ff0266; padding: 20px; margin-top: 30px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="quiz">
+        <h2 id="q-text">คุณมองโลกผ่านเลนส์ไหน?</h2>
+        <div id="options">
+            <button class="btn" onclick="start()">เริ่มทำแบบทดสอบ</button>
+        </div>
+    </div>
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Prompt', sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            transition: filter 0.5s ease;
-        }
+    <div id="result" class="result">
+        <div class="type-title" id="res-type"></div>
+        <p class="desc" id="res-desc"></p>
+        <div class="kryptonite" id="res-kryptonite"></div>
+        <button class="btn" style="text-align:center; margin-top:40px;" onclick="location.reload()">ทำใหม่อีกครั้ง</button>
+    </div>
+</div>
 
-        #app {
-            width: 100%;
-            max-width: 600px;
-            padding: 20px;
-            text-align: center;
-        }
+<script>
+    const questions = [
+        { q: "เวลาเจอปัญหาใหม่ คุณทำอย่างไร?", a: "เชื่อสัญชาตญาณและภาพในหัวที่แวบขึ้นมา (Ni)", b: "นึกถึงสิ่งที่เคยทำมาและใช้ประสบการณ์จริง (Si)", type: "N-S" },
+        { q: "อะไรทำให้คุณตื่นเต้นมากกว่า?", a: "การได้เห็นความเป็นไปได้ใหม่ๆ นับล้าน (Ne)", b: "การได้เจาะลึกจนเจอแก่นแท้เพียงหนึ่งเดียว (Ni)", type: "Ne-Ni" },
+        { q: "ถ้าเพื่อนทำผิด ตรรกะพัง คุณจะ?", a: "ชี้ข้อผิดพลาดตามความจริง (Ti)", b: "นึกถึงความรู้สึกและความสัมพันธ์ก่อน (Fi)", type: "T-F" },
+        { q: "ในการทำงาน คุณให้ราคากับอะไร?", a: "ประสิทธิภาพและผลลัพธ์ที่จับต้องได้ (Te)", b: "ความถูกต้องแม่นยำของหลักการ (Ti)", type: "Te-Ti" },
+        { q: "คุณยอมรับความบกพร่องแบบไหนได้มากกว่า?", a: "ทำตัวไร้หัวใจ แต่ทำงานเป๊ะ (T)", b: "ทำตัวซื่อบื้อ แต่จริงใจสุดๆ (F)", type: "T-F" }
+    ];
 
-        /* กล่องคำถาม */
-        .question-box {
-            background: var(--card-bg);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid #333;
-            box-shadow: 0 0 30px rgba(187, 134, 252, 0.1);
-        }
+    let current = 0;
+    let scores = { N: 0, S: 0, T: 0, F: 0, Ne: 0, Ni: 0, Ti: 0, Te: 0 };
 
-        h2 { font-size: 1.5rem; margin-bottom: 30px; line-height: 1.6; }
+    function start() {
+        showQuestion();
+    }
 
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: none;
-            border: 1px solid #444;
-            color: var(--text);
-            font-size: 1.1rem;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: 0.3s;
-        }
+    function showQuestion() {
+        if (current >= questions.length) { showResult(); return; }
+        const q = questions[current];
+        document.getElementById('q-text').innerText = q.q;
+        document.getElementById('options').innerHTML = `
+            <button class="btn" onclick="answer('A')">${q.a}</button>
+            <button class="btn" onclick="answer('B')">${q.b}</button>
+        `;
+    }
 
-        .btn:hover {
-            border-color: var(--accent);
-            background: rgba(1
+    function answer(choice) {
+        const q = questions[current];
+        if (q.type === "N-S") choice === 'A' ? scores.N++ : scores.S++;
+        if (q.type === "T-F") choice === 'A' ? scores.T++ : scores.F++;
+        if (q.type === "Ne-Ni") choice === 'A' ? scores.Ne++ : scores.Ni++;
+        if (q.type === "Te-Ti") choice === 'A' ? scores.Te++ : scores.Ti++;
+        current++;
+        showQuestion();
+    }
+
+    function showResult() {
+        document.getElementById('quiz').style.display = 'none';
+        const res = document.getElementById('result');
+        res.style.display = 'block';
+
+        let type = "";
+        let desc = "";
+        let kryp = "";
+
+        if (scores.T > scores.F) {
+            if (scores.N > scores.S) {
+                type = "THE TRUTH DISSECTOR";
+                desc = "คุณคือผู้สแกนหาความจริง ตรรกะต้องมาก่อนอารมณ์เสมอ";
+                kryp = "สิ่งที่คุณทนไม่ได้: การถูกบังคับให้ทำอะไรที่ไร้เหตุผล";
+            } else {
+                type = "THE LIVING ARCHIVE";
+                desc = "คุณคือผู้รักษาระเบียบและประสบการณ์ที่จับต้องได้";
+                kryp = "สิ่งที่คุณทนไม่ได้: ความวุ่นวายและการไม่เคารพสัญญา";
+            }
+        } else {
+            if (scores.N > scores.S)
