@@ -20,6 +20,29 @@
         
         .analysis-box { font-size: 1.05rem; color: #aaa; line-height: 1.8; margin-top: 30px; text-align: left; font-weight: 300; }
         .point { margin-bottom: 15px; border-left: 2px solid #bb86fc; padding-left: 15px; }
+        /* ปรับปุ่มให้ยาวเท่ากันและวางเรียงลงมาเป็นแนวตั้ง */
+.btn { 
+    display: block; 
+    width: 100%;           /* ยาวเต็มพื้นที่เท่ากันเป๊ะ */
+    min-height: 60px;      /* คุมความสูงให้เท่ากัน */
+    padding: 15px 20px; 
+    margin: 15px 0;        /* เว้นระยะห่างบนล่าง */
+    background: #000; 
+    border: 1px solid #333; 
+    color: #888; 
+    font-size: 1rem; 
+    cursor: pointer; 
+    border-radius: 4px; 
+    text-align: left;      /* ตัวหนังสือชิดซ้ายดูทางการ */
+    transition: 0.3s;
+    line-height: 1.4;      /* เว้นบรรทัดให้พอดี */
+}
+
+.btn:hover { 
+    border-color: #bb86fc; 
+    color: #fff; 
+    background: #0a0a0a; 
+}
     </style>
 </head>
 <body>
