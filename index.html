@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE FILTER | MBTI 8/8 AUTHENTICATOR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@900&display=swap" rel="stylesheet">
+    <style>
+        body { background: #050505; color: #d4d4d4; font-family: 'JetBrains Mono', monospace; overflow-x: hidden; }
+        .gold-glow { text-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+        .btn-option { transition: 0.3s; border: 1px solid #1a1a1a; background: #0c0c0c; }
+        .btn-option:hover { border-color: #fbbf24; background: rgba(251, 191, 36, 0.05); transform: translateX(8px); color: #fff; }
+        .glitch-text:hover { animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite; }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        .bg-void { background: radial-gradient(circle, #111 0%, #050505 100%); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 bg-void">
+
+<div id="app" class="w-full max-w-2xl border border-[#1a1a1a] p-8 md:p-12 bg-[#080808] shadow-[0_0_80px_rgba(0,0,0,1)] relative">
+    
+    <div id="quiz-header" class="mb-10 text-center">
+        <h1 class="text-5xl font-black tracking-tighter text-white mb-2 italic gold-glow glitch-text">8/8 CORE</h1>
+        <p class="text-[10px] uppercase tracking-[0.5em] text-yellow-600 opacity-70">Authenticating Neural Identity</p>
+    </div>
+
+    <div class="w-full bg-[#111] h-[2px] mb-12">
+        <div id="progress" class="bg-yellow-600 h-full transition-all duration-700" style="width: 0%"></div>
+    </div>
+
+    <div id="quiz-ui">
+        <div class="mb-10">
+            <h2 id="q-axis" class="text-[10px] text-gray-500 mb-2 tracking-widest uppercase">--- SCANNING ---</h2>
+            <p id="q-text" class="text-xl md:text-2xl font-bold text-white leading-tight italic">
+                เริ่มต้นการสแกนรหัสวิญญาณ...
+            </p>
+        </div>
+        <div id="options-stack" class="space-y-3">
+            </div>
+    </div>
+
+    <div id="result-ui" class="hidden animate-pulse">
+        <h2 class="text-4xl font-black text-white mb-4 italic">SCAN COMPLETE.</h2>
+        <div id="verdict-box" class="bg-[#111] p-6 border-l-4 border-yellow-600 mb-8">
+            <p id="verdict-text" class="text-lg leading-relaxed text-yellow-500"></p>
+        </div>
+        <div class="flex justify-between items-center opacity-40 text-[10px]">
+            <span id="raw-data">RAW DATA: ENCRYPTED</span>
+            <button onclick="location.reload()" class="border border-white px-4 py-1 hover:bg-white hover:text-black transition uppercase">Re-Scan</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const scenarios = [
+        { axis: "NI vs SI", q: "เมื่อเผชิญหน้ากับเหตุการณ์ประหลาด คุณมองหาอะไรเป็นอย่างแรก?", 
+          opts: [{t: "ความหมายแฝงและรูปแบบที่ซ่อนอยู่ (Pattern)", v: "Ni"}, {t: "รายละเอียดที่ชัดเจนและเทียบกับสิ่งที่เคยเจอ (Past)", v: "Si"}] },
+        { axis: "TE vs TI", q: "เกณฑ์ในการตัดสินใจเลือก 'วิธีแก้ปัญหา' ของคุณคือ?", 
+          opts: [{t: "ความรวดเร็วและผลลัพธ์ที่จับต้องได้จริง (Utility)", v: "Te"}, {t: "ความแม่นยำทางตรรกะที่สมบูรณ์แบบ (Logic)", v: "Ti"}] },
+        { axis: "FE vs FI", q: "คุณทนสิ่งใดไม่ได้มากกว่ากัน?", 
+          opts: [{t: "การต้องหักหลังความเชื่อส่วนตัว (Inward)", v: "Fi"}, {t: "บรรยากาศรอบตัวที่แตกแยก (Outward)", v: "Fe"}] },
+        { axis: "TRAP: INTJ/ENTJ", q: "หากแผนการที่ 'สมบูรณ์แบบ' ของคุณล้มเหลวเพราะปัจจัยที่คุมไม่ได้?", 
+          opts: [{t: "ผมมีแผนสำรองไว้เสมอ (Stereotype Answer)", v: "Fake"}, {t: "รู้สึกสมองตื้อและอยากทำอะไรบ้าๆ ระบายเครียด (Se-Grip)", v: "Real"}] },
+        { axis: "TRAP: THE TRUTH", q: "กฎที่มีไว้รัดหัว (มงคล) แต่ไร้ประสิทธิภาพ คุณจัดการอย่างไร?", 
+          opts: [{t: "เดินตามกฎเพื่อรักษาระบบ (Standard)", v: "Si"}, {t: "หัวเราะเยาะมัน แล้วข้ามไปหาผลลัพธ์ (Outcome)", v: "Te"}] }
+    ];
+
+    let step = 0;
+    let scores = { Ni:0, Si:0, Te:0, Ti:0, Fe:0, Fi:0, Real:0, Fake:0 };
+
+    function render() {
+        if (step < scenarios.length) {
+            const s = scenarios[step];
+            document.getElementById('q-axis').innerText = `ANALYZING AXIS: ${s.axis}`;
+            document.getElementById('q-text').innerText = s.q;
+            document.getElementById('progress').style.width = `${(step / scenarios.length) * 100}%`;
+            document.getElementById('options-stack').innerHTML = s.opts.map(o => 
+                `<button onclick="next('${o.v}')" class="btn-option w-full text-left p-4 rounded text-sm md:text-base">${o.t}</button>`
+            ).join('');
+        } else { showResult(); }
+    }
+
+    function next(v) { scores[v]++; step++; render(); }
+
+    function showResult() {
+        document.getElementById('quiz-ui').classList.add('hidden');
+        document.getElementById('result-ui').classList.remove('hidden');
+        document.getElementById('progress').style.width = '100%';
+        
+        let msg = "";
+        if(scores.Fake > scores.Real) msg = "ตรวจพบรหัส 'ปลอม' (Stereotype Bias): คุณกำลังตอบตามภาพลักษณ์ที่อยากเป็น มากกว่าเนื้อแท้ของวิญญาณ";
+        else if(scores.Ni > scores.Si) msg = "ตรวจพบรหัส 'ธาตุรู้' (Ni Dominant): คุณมองเห็นความว่างเปล่าก่อนสิ่งก่อสร้าง ยินดีด้วย... คุณคือตัวจริง";
+        else msg = "ตรวจพบรหัส 'ผู้รักษาระบบ' (Sensing): คุณยึดโยงกับโลกความจริงได้มั่นคง แต่ระวังมงคลจะรัดหัวจนลืมหัวเราะ";
+
+        document.getElementById('verdict-text').innerText = msg;
+        document.getElementById('raw-data').innerText = `RAW DATA: ${JSON.stringify(scores)}`;
+    }
+    render();
+</script>
+</body>
+</html>
