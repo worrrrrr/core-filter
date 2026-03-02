@@ -88,4 +88,21 @@
                 kryp = "สิ่งที่คุณทนไม่ได้: ความวุ่นวายและการไม่เคารพสัญญา";
             }
         } else {
-            if (scores.N > scores.S)
+            if (scores.N > scores.S) {
+                type = "THE PATTERN SEEKER";
+                desc = "คุณมองหาความหมายลึกซึ้งและอนาคตที่ยังมาไม่ถึง";
+                kryp = "สิ่งที่คุณทนไม่ได้: ความตื้นเขินและการใช้ชีวิตไปวันๆ";
+            } else {
+                type = "THE INTERNAL ANCHOR";
+                desc = "คุณยึดมั่นในความรู้สึกจริงแท้และความเป็นตัวของตัวเอง";
+                kryp = "สิ่งที่คุณทนไม่ได้: การต้องสวมหน้ากากหรือทำสิ่งที่ขัดกับใจ";
+            }
+        }
+
+        document.getElementById('res-type').innerText = type;
+        document.getElementById('res-desc').innerText = desc;
+        document.getElementById('res-kryptonite').innerText = kryp;
+    }
+</script>
+</body>
+</html>
