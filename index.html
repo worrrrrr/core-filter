@@ -2,107 +2,120 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Core Filter | Reality Check</title>
+    <title>Core Filter | Final Release</title>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        #app { width: 90%; max-width: 600px; padding: 40px 0; }
-        .btn { display: block; width: 100%; padding: 20px; margin: 15px 0; background: #111; border: 1px solid #333; color: #fff; font-size: 1.2rem; cursor: pointer; border-radius: 8px; transition: 0.2s; text-align: left; }
+        #app { width: 90%; max-width: 500px; text-align: center; padding: 20px; }
+        .btn { display: block; width: 100%; padding: 20px; margin: 10px 0; background: #111; border: 1px solid #333; color: #fff; font-size: 1.1rem; cursor: pointer; border-radius: 8px; text-align: left; }
         .btn:hover { border-color: #bb86fc; background: #1a1a1a; }
-        h2 { font-size: 1.8rem; margin-bottom: 30px; line-height: 1.4; }
-        .result { display: none; text-align: center; }
-        .type-title { color: #bb86fc; font-size: 2.5rem; margin-bottom: 10px; }
-        .desc { font-size: 1.2rem; line-height: 1.6; color: #ccc; }
-        .kryptonite { border: 1px solid #ff0266; color: #ff0266; padding: 20px; margin-top: 30px; border-radius: 8px; }
+        .hidden { display: none; }
+        h2 { font-size: 1.4rem; line-height: 1.5; margin-bottom: 25px; text-align: left; }
+        #result-screen { border: 2px solid #bb86fc; padding: 30px; border-radius: 15px; background: #0a0a0a; }
+        .type-tag { font-size: 3rem; color: #bb86fc; font-weight: bold; margin: 10px 0; }
+        .desc { font-size: 1.1rem; color: #ccc; line-height: 1.6; margin-bottom: 20px; }
     </style>
 </head>
 <body>
+
 <div id="app">
-    <div id="quiz">
-        <h2 id="q-text">คุณมองโลกผ่านเลนส์ไหน?</h2>
+    <div id="start-screen">
+        <h1 style="letter-spacing: 5px;">CORE FILTER</h1>
+        <p style="color:#888">เจาะลึกเลนส์ที่คุณใช้มองโลก</p>
+        <button class="btn" style="text-align:center" onclick="startQuiz()">เริ่มการทดสอบ</button>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <h2 id="q-text">คำถาม</h2>
         <div id="options">
-            <button class="btn" onclick="start()">เริ่มทำแบบทดสอบ</button>
+            <button class="btn" onclick="handleAnswer('A')" id="optA"></button>
+            <button class="btn" onclick="handleAnswer('B')" id="optB"></button>
         </div>
     </div>
 
-    <div id="result" class="result">
-        <div class="type-title" id="res-type"></div>
-        <p class="desc" id="res-desc"></p>
-        <div class="kryptonite" id="res-kryptonite"></div>
-        <button class="btn" style="text-align:center; margin-top:40px;" onclick="location.reload()">ทำใหม่อีกครั้ง</button>
+    <div id="result-screen" class="hidden">
+        <div style="font-size: 0.9rem; color: #888;">เนื้อแท้ของคุณคือ</div>
+        <div id="res-type" class="type-tag"></div>
+        <p id="res-desc" class="desc"></p>
+        <div id="res-truth" style="color: #ff0266; font-weight: bold; border-top: 1px solid #333; padding-top: 20px;"></div>
+        <button class="btn" style="text-align:center; margin-top:30px; border-color:#444" onclick="location.reload()">ทดสอบใหม่อีกครั้ง</button>
     </div>
 </div>
 
 <script>
+    // ชุดคำถามที่ครอบคลุม 4 แกนหลัก (E/I, N/S, T/F, J/P)
     const questions = [
-        { q: "เวลาเจอปัญหาใหม่ คุณทำอย่างไร?", a: "เชื่อสัญชาตญาณและภาพในหัวที่แวบขึ้นมา (Ni)", b: "นึกถึงสิ่งที่เคยทำมาและใช้ประสบการณ์จริง (Si)", type: "N-S" },
-        { q: "อะไรทำให้คุณตื่นเต้นมากกว่า?", a: "การได้เห็นความเป็นไปได้ใหม่ๆ นับล้าน (Ne)", b: "การได้เจาะลึกจนเจอแก่นแท้เพียงหนึ่งเดียว (Ni)", type: "Ne-Ni" },
-        { q: "ถ้าเพื่อนทำผิด ตรรกะพัง คุณจะ?", a: "ชี้ข้อผิดพลาดตามความจริง (Ti)", b: "นึกถึงความรู้สึกและความสัมพันธ์ก่อน (Fi)", type: "T-F" },
-        { q: "ในการทำงาน คุณให้ราคากับอะไร?", a: "ประสิทธิภาพและผลลัพธ์ที่จับต้องได้ (Te)", b: "ความถูกต้องแม่นยำของหลักการ (Ti)", type: "Te-Ti" },
-        { q: "คุณยอมรับความบกพร่องแบบไหนได้มากกว่า?", a: "ทำตัวไร้หัวใจ แต่ทำงานเป๊ะ (T)", b: "ทำตัวซื่อบื้อ แต่จริงใจสุดๆ (F)", type: "T-F" }
+        { q: "คุณชาร์จพลังงานด้วยวิธีไหน?", a: "ออกไปเจอโลกและผู้คน (E)", b: "อยู่เงียบๆ กับความคิดตัวเอง (I)" },
+        { q: "เวลาประมวลผลข้อมูล คุณเชื่ออะไร?", a: "สัญชาตญาณและภาพรวม (N)", b: "รายละเอียดและข้อเท็จจริง (S)" },
+        { q: "เวลาตัดสินใจ คุณใช้อะไรนำทาง?", a: "ตรรกะและความสมเหตุสมผล (T)", b: "ความรู้สึกและความเห็นอกเห็นใจ (F)" },
+        { q: "คุณชอบใช้ชีวิตแบบไหนมากกว่า?", a: "วางแผนไว้ล่วงหน้าชัดเจน (J)", b: "ยืดหยุ่น ปรับไปตามหน้างาน (P)" }
     ];
 
     let current = 0;
-    let scores = { N: 0, S: 0, T: 0, F: 0, Ne: 0, Ni: 0, Ti: 0, Te: 0 };
+    let results = { E:0, I:0, N:0, S:0, T:0, F:0, J:0, P:0 };
 
-    function start() {
-        showQuestion();
+    function startQuiz() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        renderQuestion();
     }
 
-    function showQuestion() {
-        if (current >= questions.length) { showResult(); return; }
-        const q = questions[current];
-        document.getElementById('q-text').innerText = q.q;
-        document.getElementById('options').innerHTML = `
-            <button class="btn" onclick="answer('A')">${q.a}</button>
-            <button class="btn" onclick="answer('B')">${q.b}</button>
-        `;
-    }
-
-    function answer(choice) {
-        const q = questions[current];
-        if (q.type === "N-S") choice === 'A' ? scores.N++ : scores.S++;
-        if (q.type === "T-F") choice === 'A' ? scores.T++ : scores.F++;
-        if (q.type === "Ne-Ni") choice === 'A' ? scores.Ne++ : scores.Ni++;
-        if (q.type === "Te-Ti") choice === 'A' ? scores.Te++ : scores.Ti++;
-        current++;
-        showQuestion();
-    }
-
-    function showResult() {
-        document.getElementById('quiz').style.display = 'none';
-        const res = document.getElementById('result');
-        res.style.display = 'block';
-
-        let type = "";
-        let desc = "";
-        let kryp = "";
-
-        if (scores.T > scores.F) {
-            if (scores.N > scores.S) {
-                type = "THE TRUTH DISSECTOR";
-                desc = "คุณคือผู้สแกนหาความจริง ตรรกะต้องมาก่อนอารมณ์เสมอ";
-                kryp = "สิ่งที่คุณทนไม่ได้: การถูกบังคับให้ทำอะไรที่ไร้เหตุผล";
-            } else {
-                type = "THE LIVING ARCHIVE";
-                desc = "คุณคือผู้รักษาระเบียบและประสบการณ์ที่จับต้องได้";
-                kryp = "สิ่งที่คุณทนไม่ได้: ความวุ่นวายและการไม่เคารพสัญญา";
-            }
-        } else {
-            if (scores.N > scores.S) {
-                type = "THE PATTERN SEEKER";
-                desc = "คุณมองหาความหมายลึกซึ้งและอนาคตที่ยังมาไม่ถึง";
-                kryp = "สิ่งที่คุณทนไม่ได้: ความตื้นเขินและการใช้ชีวิตไปวันๆ";
-            } else {
-                type = "THE INTERNAL ANCHOR";
-                desc = "คุณยึดมั่นในความรู้สึกจริงแท้และความเป็นตัวของตัวเอง";
-                kryp = "สิ่งที่คุณทนไม่ได้: การต้องสวมหน้ากากหรือทำสิ่งที่ขัดกับใจ";
-            }
+    function renderQuestion() {
+        if (current >= questions.length) {
+            renderResult();
+            return;
         }
+        const q = questions[current];
+        document.getElementById('q-text').innerText = (current + 1) + ". " + q.q;
+        document.getElementById('optA').innerText = q.a;
+        document.getElementById('optB').innerText = q.b;
+    }
+
+    function handleAnswer(choice) {
+        const q = questions[current];
+        const selected = choice === 'A' ? q.a : q.b;
+        const letter = selected.match(/\((.)\)/)[1];
+        
+        results[letter]++;
+        current++;
+        renderQuestion();
+    }
+
+    function renderResult() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+
+        // สรุปไทป์จากแต้ม
+        let type = "";
+        type += results.E >= results.I ? "E" : "I";
+        type += results.N >= results.S ? "N" : "S";
+        type += results.T >= results.F ? "T" : "F";
+        type += results.J >= results.P ? "J" : "P";
+
+        const typeInfo = {
+            "INTJ": { desc: "นักวางกลยุทธ์ผู้มองการณ์ไกล", truth: "ทนไม่ได้กับความไม่สมเหตุสมผล" },
+            "INFJ": { desc: "ผู้หยั่งรู้ที่มีอุดมการณ์แรงกล้า", truth: "ทนไม่ได้กับการฉาบฉวยและไร้ความหมาย" },
+            "INTP": { desc: "นักคิดวิเคราะห์ผู้รักความถูกต้อง", truth: "ทนไม่ได้กับตรรกะวิบัติ" },
+            "INFP": { desc: "นักฝันผู้ซื่อสัตย์ต่อจิตวิญญาณ", truth: "ทนไม่ได้กับการต้องสวมหน้ากาก" },
+            "ISTJ": { desc: "ผู้รักษาความถูกต้องและระเบียบวินัย", truth: "ทนไม่ได้กับความสะเพร่า" },
+            "ISFJ": { desc: "ผู้พิทักษ์ที่ใส่ใจทุกรายละเอียด", truth: "ทนไม่ได้กับการอกตัญญู" },
+            "ISTP": { desc: "นักประดิษฐ์ผู้เงียบขรึมและสมจริง", truth: "ทนไม่ได้กับการถูกบงการ" },
+            "ISFP": { desc: "ศิลปินผู้รักอิสระและปัจจุบันกาล", truth: "ทนไม่ได้กับการถูกจำกัดตัวตน" },
+            "ENTJ": { desc: "ผู้นำผู้เด็ดขาดและบ้าพลัง", truth: "ทนไม่ได้กับความขี้เกียจ" },
+            "ENFJ": { desc: "ผู้สร้างแรงบันดาลใจให้มวลชน", truth: "ทนไม่ได้กับการเห็นคนถูกทอดทิ้ง" },
+            "ENTP": { desc: "นักโต้วาทีผู้ทลายกรอบเดิมๆ", truth: "ทนไม่ได้กับความน่าเบื่อซ้ำซาก" },
+            "ENFP": { desc: "นักสร้างสรรค์ผู้จุดประกายความเป็นไปได้", truth: "ทนไม่ได้กับการถูกขังในกรอบ" },
+            "ESTJ": { desc: "ผู้บริหารที่เน้นผลลัพธ์และความจริง", truth: "ทนไม่ได้กับความไร้ประสิทธิภาพ" },
+            "ESFJ": { desc: "ผู้ดูแลสังคมและสร้างมิตรภาพ", truth: "ทนไม่ได้กับการถูกมองข้าม" },
+            "ESTP": { desc: "นักลุยที่กล้าได้กล้าเสีย", truth: "ทนไม่ได้กับการนั่งรอเฉยๆ" },
+            "ESFP": { desc: "ผู้สร้างความบันเทิงและพลังบวก", truth: "ทนไม่ได้กับบรรยากาศที่ตึงเครียด" }
+        };
 
         document.getElementById('res-type').innerText = type;
-        document.getElementById('res-desc').innerText = desc;
-        document.getElementById('res-kryptonite').innerText = kryp;
+        document.getElementById('res-desc').innerText = typeInfo[type].desc;
+        document.getElementById('res-truth').innerText = "CORE TRUTH: " + typeInfo[type].truth;
     }
 </script>
+
 </body>
+</html>
 </html>
