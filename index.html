@@ -1,191 +1,86 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Structural Exposure</title>
-<style>
-body{
-    font-family: Arial, sans-serif;
-    background:#f4f4f4;
-    color:#111;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    margin:0;
-}
-.container{
-    width:520px;
-}
-h1{
-    font-size:18px;
-    letter-spacing:2px;
-    margin-bottom:20px;
-}
-.question{
-    margin-bottom:20px;
-}
-button{
-    display:block;
-    width:100%;
-    padding:10px;
-    margin:8px 0;
-    background:#fff;
-    border:1px solid #ccc;
-    cursor:pointer;
-}
-button:hover{
-    background:#eaeaea;
-}
-.result{
-    display:none;
-}
-.small{
-    font-size:13px;
-    color:#666;
-    margin-bottom:20px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MBTI Process Checker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-width: 500px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+    }
+    .question {
+      margin: 20px 0;
+    }
+    button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      background: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #f0f0f0;
+    }
+    .result {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
+  <div class="card">
+    <h1>MBTI Process Checker</h1>
+    <div id="app"></div>
+  </div>
 
-<div class="container">
-
-<div id="intro">
-<h1>STRUCTURAL EXPOSURE</h1>
-<div class="small">
-นี่ไม่ใช่แบบทดสอบบุคลิกภาพ<br>
-แต่มันจะเผยโครงสร้างที่คุณปกป้องอยู่<br><br>
-ถ้าคุณต้องการคำยืนยัน ให้ปิดหน้านี้<br>
-ถ้าคุณพร้อมเห็นสิ่งที่ซ่อนอยู่ กดต่อไป
-</div>
-<button onclick="start()">ดำเนินต่อ</button>
-</div>
-
-<div id="quiz" style="display:none;">
-<div class="question" id="questionText"></div>
-<div id="answers"></div>
-</div>
-
-<div id="result" class="result"></div>
-
-</div>
-
-<script>
-
-const questions = [
-{
-q:"เมื่อคุณถูกเข้าใจผิด สิ่งที่รบกวนใจคุณที่สุดคืออะไร?",
-a:[
-{text:"ตรรกะถูกมองข้าม",type:"loyalist"},
-{text:"ผลลัพธ์อาจเสียหาย",type:"navigator"},
-{text:"โครงสร้างยังไม่สมบูรณ์",type:"architect"},
-{text:"ความสามารถของฉันถูกตั้งคำถาม",type:"architect"}
-]
-},
-{
-q:"เมื่ออยู่ภายใต้แรงกดดัน คุณมักจะ…",
-a:[
-{text:"ยึดหลักให้แน่นขึ้น",type:"loyalist"},
-{text:"ปรับวิธีสื่อสาร",type:"navigator"},
-{text:"ชะลอการตัดสินใจ",type:"architect"},
-{text:"ถอยมาสังเกตการณ์",type:"loyalist"}
-]
-},
-{
-q:"เมื่อเผชิญความไม่แน่นอน คุณจะ…",
-a:[
-{text:"ยืนยันหลักการเดิม",type:"loyalist"},
-{text:"อ่านบรรยากาศก่อน",type:"navigator"},
-{text:"รอให้ภาพชัดกว่านี้",type:"architect"},
-{text:"ลดการเปิดเผยตัวเอง",type:"architect"}
-]
-}
-];
-
-let index = 0;
-let score = {loyalist:0,navigator:0,architect:0};
-
-function start(){
-document.getElementById("intro").style.display="none";
-document.getElementById("quiz").style.display="block";
-showQuestion();
-}
-
-function showQuestion(){
-const q = questions[index];
-document.getElementById("questionText").innerText = q.q;
-const answersDiv = document.getElementById("answers");
-answersDiv.innerHTML = "";
-q.a.forEach(ans=>{
-let btn=document.createElement("button");
-btn.innerText=ans.text;
-btn.onclick=function(){
-score[ans.type]++;
-next();
-};
-answersDiv.appendChild(btn);
-});
-}
-
-function next(){
-index++;
-if(index<questions.length){
-showQuestion();
-}else{
-showResult();
-}
-}
-
-function showResult(){
-document.getElementById("quiz").style.display="none";
-let top = Object.keys(score).reduce((a,b)=>score[a]>score[b]?a:b);
-
-let output = "";
-
-if(top==="loyalist"){
-output = `
-<h2>คุณไม่ได้ปกป้องความจริง<br>คุณปกป้องโครงสร้างของคุณ</h2>
-<p>
-คุณเทียบความสอดคล้องกับความถูกต้อง<br>
-ความยืดหยุ่นดูเหมือนการประนีประนอม<br>
-เมื่อถูกท้าทาย คุณเสริมระบบให้แน่นขึ้น<br><br>
-ถ้าโครงสร้างร้าว ตัวตนคุณก็สั่นคลอน
-</p>
-`;
-}
-
-if(top==="navigator"){
-output = `
-<h2>คุณไม่ได้เป็นผู้นำ<br>คุณกำลังปรับสมดุล</h2>
-<p>
-คุณปรับก่อนเผชิญหน้า<br>
-ความเกี่ยวข้องสำคัญกว่าความแข็งทื่อ<br>
-คุณเรียกมันว่ากลยุทธ์ บางครั้งมันคือการหลีกเลี่ยง<br><br>
-ถ้าห้องเงียบลง คุณเริ่มไม่มั่นคง
-</p>
-`;
-}
-
-if(top==="architect"){
-output = `
-<h2>คุณไม่ได้ลังเล<br>คุณกำลังกักเก็บ</h2>
-<p>
-คุณชะลอเพื่อรักษาตำแหน่ง<br>
-การเตรียมพร้อมคือเกราะของอัตตา<br>
-คุณสร้างก่อนจะลงสนาม<br><br>
-คุณไม่แพ้<br>
-คุณแค่ไม่ยอมเปิดช่องให้เสี่ยง
-</p>
-`;
-}
-
-document.getElementById("result").innerHTML = output + "<br><br><small>นั่งอยู่กับมัน</small>";
-document.getElementById("result").style.display="block";
-}
-
-</script>
-
+  <script>
+    const questions = [
+      {
+        text: "ถ้าคุณทำอะไรสักอย่างคนเดียว ไม่มีใครเกี่ยวข้อง คุณจะเป็นแบบไหน?",
+        options: [
+          { label: "ยังสนุกกับการวางแผนและทำให้มันมีระบบ", type: "INTJ" },
+          { label: "รู้สึกเฉยลง ถ้าไม่มีความเกี่ยวข้องกับคนหรือความหมาย", type: "INFJ" },
+          { label: "ดูที่ความรู้สึกตัวเองก่อน ว่าอยากทำไหม", type: "ISFP" }
+        ]
+      },
+      {
+        text: "เวลาต้องเลือกเรื่องสำคัญ คุณดูอะไรเป็นหลัก?",
+        options: [
+          { label: "อะไรที่ทำให้สำเร็จและควบคุมผลได้ดีที่สุด", type: "INTJ" },
+          { label: "อะไรที่ตรงกับภาพอนาคตที่ฉันมองเห็น", type: "INFJ" },
+          { label: "อะไรที่ไม่ขัดกับความรู้สึกหรือคุณค่าของฉัน", type: "ISFP" }
+        ]
+      },
+      {
+        text: "ตอนเครียดมาก ๆ คุณมักจะ…",
+        options: [
+          { label: "คุมทุกอย่างเอง จัดการให้มันเข้าที่", type: "INTJ" },
+          { label: "เงียบลง เข้าไปคิดคนเดียวลึก ๆ", type: "INFJ" },
+          { label: "ถอยออกมา ปกป้องตัวเองก่อน", type: "ISFP" }
+        ]
+      },
+      {
+        text: "เวลาอยู่กับคนใหม่ ๆ แล้วคุณเงียบ เพราะอะไรบ่อยสุด?",
+        options: [
+          { label: "ยังไม่มีอะไรที่ต้องเข้าไปจัดการ", type: "INTJ" },
 </body>
-</html>
