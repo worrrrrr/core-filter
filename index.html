@@ -83,6 +83,62 @@
         text: "เวลาอยู่กับคนใหม่ ๆ แล้วคุณเงียบ เพราะอะไรบ่อยสุด?",
         options: [
           { label: "ยังไม่มีอะไรที่ต้องเข้าไปจัดการ", type: "INTJ" },
+          { label: "กำลังดูจังหวะและอ่านบรรยากาศ", type: "INFJ" },
+          { label: "ยังไม่รู้สึกสบายใจพอจะเปิดตัวเอง", type: "ISFP" }
+        ]
+      }
+    ];
+
+    let current = 0;
+    let answers = [];
+
+    const app = document.getElementById("app");
+
+    function renderQuestion() {
+      const q = questions[current];
+      app.innerHTML = `
+        <div class="question">
+          <p>${q.text}</p>
+          ${q.options
+            .map(
+              (opt) =>
+                `<button onclick="selectAnswer('${opt.type}')">${opt.label}</button>`
+            )
+            .join("")}
+        </div>
+      `;
+    }
+
+    function selectAnswer(type) {
+      answers.push(type);
+      current++;
+      if (current < questions.length) {
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      const count = {};
+      answers.forEach((a) => {
+        count[a] = (count[a] || 0) + 1;
+      });
+
+      const result = Object.keys(count).reduce((a, b) =>
+        count[a] > count[b] ? a : b
+      );
+
+      app.innerHTML = `
+        <div class="result">
+          <h2>ผลลัพธ์ของคุณ</h2>
+          <p><strong>${result}</strong></p>
+          <button onclick="location.reload()">ทำใหม่</button>
+        </div>
+      `;
+    }
+
+    renderQuestion();
+  </script>
 </body>
-          
 </html>
