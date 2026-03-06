@@ -2,80 +2,99 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>The Slicer 16 | Ultimate Architect Logic</title>
+    <title>The Slicer 16 | Final Build</title>
     <style>
-        :root { --bg: #050505; --card: #111; --accent: #00ffcc; --text: #f0f0f0; --dim: #444; }
+        :root { --bg: #050505; --card: #111; --accent: #00ffcc; --text: #f0f0f0; --dim: #444; --danger: #ff4d4d; }
         body { background: var(--bg); color: var(--text); font-family: 'Consolas', 'Courier New', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        #app { width: 95%; max-width: 650px; background: var(--card); padding: 40px; border: 1px solid #222; position: relative; }
-        .progress-bar { width: 100%; height: 2px; background: #222; margin-bottom: 30px; position: relative; }
+        #app { width: 95%; max-width: 650px; background: var(--card); padding: 40px; border: 1px solid #222; box-shadow: 0 0 30px rgba(0,255,204,0.05); }
+        .progress-bar { width: 100%; height: 2px; background: #222; margin-bottom: 30px; }
         #timer-line { width: 100%; height: 100%; background: var(--accent); transition: width 0.1s linear; }
-        .q-text { font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5; color: var(--accent); }
+        .q-text { font-size: 1.1rem; margin-bottom: 25px; color: var(--accent); letter-spacing: 1px; }
         .btn { display: block; width: 100%; padding: 18px; margin: 12px 0; background: #181818; border: 1px solid #333; color: #fff; text-align: left; cursor: pointer; transition: 0.2s; }
-        .btn:hover { background: #fff; color: #000; border-color: #fff; }
+        .btn:hover { background: #fff; color: #000; font-weight: bold; }
         .question-box { display: none; }
         .question-box.active { display: block; }
         #result { display: none; text-align: center; }
-        .verdict { font-size: 3rem; font-weight: bold; margin: 20px 0; letter-spacing: -2px; }
-        .status-tag { display: inline-block; padding: 5px 15px; border: 1px solid; margin-bottom: 20px; font-size: 0.8rem; }
+        .verdict { font-size: 3.5rem; font-weight: bold; margin: 15px 0; letter-spacing: -2px; text-shadow: 0 0 20px rgba(0,255,204,0.3); }
+        .status-tag { display: inline-block; padding: 5px 15px; border: 1px solid; margin-bottom: 20px; font-size: 0.75rem; letter-spacing: 2px; }
+        #logic-desc { line-height: 1.8; color: #888; font-size: 0.95rem; }
     </style>
 </head>
 <body>
 
 <div id="app">
     <div class="progress-bar"><div id="timer-line"></div></div>
-    <div id="counter" style="font-size: 0.7rem; color: var(--dim); margin-bottom: 10px;">SCANNING...</div>
+    <div id="counter" style="font-size: 0.7rem; color: var(--dim); margin-bottom: 10px;">SYSTEM_CALIBRATING...</div>
 
     <div id="quiz-container"></div>
 
     <div id="result">
-        <div style="font-size: 0.8rem; color: var(--dim);">[ ANALYSIS_RESULT ]</div>
+        <div style="font-size: 0.7rem; color: var(--dim); letter-spacing: 2px;">[ FINAL_ANALYSIS_COMPLETE ]</div>
         <div id="final-type" class="verdict">---</div>
         <div id="auth-tag" class="status-tag">---</div>
-        <p id="logic-desc" style="line-height: 1.8; color: #888;"></p>
+        <p id="logic-desc"></p>
         <button class="btn" style="text-align: center; margin-top: 30px;" onclick="location.reload()">RE-INITIALIZE SYSTEM</button>
     </div>
 </div>
 
 <script>
-    // คำถาม 20 ข้อที่คุณไฟเขียว (ตัดวงเล็บออก)
+    // 20 Questions Logic Mapping
     const questions = [
-        { q: "เวลาเจอโปรเจกต์ใหม่ คุณมักจะ...", a: "มองหาภาพสุดท้ายที่สำเร็จ", b: "รวบรวมข้อมูลที่มีทั้งหมดก่อน", f: "Ni" },
-        { q: "คุณตัดสินใจเลือกทางเดินชีวิตจาก...", a: "สิ่งที่คาดเดาว่าจะเกิดขึ้น", b: "สิ่งที่เคยทำได้ดีในอดีต", f: "Ni" },
-        { q: "เวลาอธิบายงาน คุณชอบพูดถึง...", a: "คอนเซปต์และไอเดียภาพรวม", b: "ขั้นตอนและรายละเอียดที่ชัดเจน", f: "Ne" },
-        { q: "คุณรู้สึกมีพลังมากที่สุดเมื่อ...", a: "เชื่อมโยงจุดต่างๆ เป็นภาพเดียว", b: "ทดลองทำไอเดียใหม่ๆ ไปเรื่อยๆ", f: "Ni" },
-        { q: "ในวงสนทนา คุณมักจะ...", a: "รับรู้ความรู้สึกของคนรอบข้าง", b: "ยึดมั่นในเหตุผลและความจริง", f: "Fe" },
-        { q: "ถ้าต้องวิจารณ์งานคนอื่น คุณจะ...", a: "พูดตรงๆ ตามเนื้อผ้า", b: "รักษาน้ำใจและบรรยากาศ", f: "Te" },
-        { q: "คุณจัดการความเครียดด้วยการ...", a: "วางแผนหาทางออกที่เป็นระบบ", b: "ทำตามความรู้สึกที่อยากทำ", f: "Te" },
-        { q: "สิ่งที่ทำให้คุณหงุดหงิดที่สุดคือ...", a: "การทำงานที่ไร้ประสิทธิภาพ", b: "การถูกละเมิดตัวตนและคุณค่า", f: "Te" },
-        { q: "เวลาว่างคุณชอบที่จะ...", a: "อยู่ในโลกแห่งความคิด", b: "มองหาสิ่งกระตุ้นใหม่ๆ รอบตัว", f: "Ti" },
-        { q: "คุณมองเหตุการณ์ที่เกิดขึ้นว่า...", a: "ทุกอย่างมีที่มาและผลลัพธ์", b: "ทุกอย่างเป็นเรื่องของจังหวะ", f: "Ni" },
-        { q: "การแก้ปัญหาเฉพาะหน้าของคุณคือ...", a: "ใช้ตรรกะวิเคราะห์สาเหตุ", b: "ใช้สัญชาตญาณความรู้สึก", f: "Ti" },
-        { q: "คุณเชื่อมั่นใน...", a: "ข้อมูลที่พิสูจน์ได้จริง", b: "ลางสังหรณ์ที่อธิบายไม่ได้", f: "Si" },
-        { q: "เวลาคุยกับเพื่อนที่กำลังเศร้า...", a: "คุณพยายามหาทางออกให้", b: "คุณพยายามเข้าใจความรู้สึก", f: "Fe" },
-        { q: "คุณชอบทำงานในสภาวะที่...", a: "มีโครงสร้างระเบียบชัดเจน", b: "มีอิสระในการปรับเปลี่ยน", f: "Si" },
-        { q: "คุณมักจะสังเกตเห็น...", a: "รูปแบบ (Pattern) ที่ซ่อนอยู่", b: "รายละเอียด (Detail) ที่ผิดไป", f: "Ni" },
-        { q: "คำชมแบบไหนที่คุณชอบที่สุด...", a: "คุณคือคนที่มีวิสัยทัศน์", b: "คุณคือคนที่ไว้ใจได้เสมอ", f: "Ni" },
-        { q: "ถ้าโลกนี้ไม่มีกฎเกณฑ์...", a: "คุณจะสร้างกฎขึ้นมาใหม่เอง", b: "คุณจะสนุกกับเสรีภาพที่มี", f: "Te" },
-        { q: "ความผิดพลาดในอดีตสำหรับคุณคือ...", a: "บทเรียนที่ต้องไม่เกิดซ้ำ", b: "เรื่องที่จบไปแล้วไม่ต้องคิด", f: "Si" },
-        { q: "คุณมักจะสงสัยใน...", a: "เจตนาที่แท้จริงของคนอื่น", b: "ความถูกต้องของข้อมูลคนอื่น", f: "Fe" },
-        { q: "เป้าหมายสูงสุดของคุณคือ...", a: "การสร้างสิ่งที่ยั่งยืนและลึกซึ้ง", b: "การใช้ชีวิตให้คุ้มค่าที่สุด", f: "Ni" }
+        { q: "เวลาเจอโปรเจกต์ใหม่ คุณมักจะ...", a: "มองหาภาพสุดท้ายที่สำเร็จ", b: "รวบรวมข้อมูลที่มีทั้งหมดก่อน", t: "NJ" },
+        { q: "คุณตัดสินใจเลือกทางเดินชีวิตจาก...", a: "สิ่งที่คาดเดาว่าจะเกิดขึ้น", b: "สิ่งที่เคยทำได้ดีในอดีต", t: "NJ" },
+        { q: "เวลาอธิบายงาน คุณชอบพูดถึง...", a: "คอนเซปต์และไอเดียภาพรวม", b: "ขั้นตอนและรายละเอียดที่ชัดเจน", t: "NP" },
+        { q: "คุณรู้สึกมีพลังมากที่สุดเมื่อ...", a: "เชื่อมโยงจุดต่างๆ เป็นภาพเดียว", b: "ทดลองทำไอเดียใหม่ๆ ไปเรื่อยๆ", t: "NJ" },
+        { q: "ในวงสนทนา คุณมักจะ...", a: "รับรู้ความรู้สึกของคนรอบข้าง", b: "ยึดมั่นในเหตุผลและความจริง", t: "FJ" },
+        { q: "ถ้าต้องวิจารณ์งานคนอื่น คุณจะ...", a: "พูดตรงๆ ตามเนื้อผ้า", b: "รักษาน้ำใจและบรรยากาศ", t: "TJ" },
+        { q: "คุณจัดการความเครียดด้วยการ...", a: "วางแผนหาทางออกที่เป็นระบบ", b: "ทำตามความรู้สึกที่อยากทำ", t: "TJ" },
+        { q: "สิ่งที่ทำให้คุณหงุดหงิดที่สุดคือ...", a: "การทำงานที่ไร้ประสิทธิภาพ", b: "การถูกละเมิดตัวตนและคุณค่า", t: "TJ" },
+        { q: "เวลาว่างคุณชอบที่จะ...", a: "อยู่กับตัวเองในโลกความคิด", b: "ออกไปหาประสบการณ์ใหม่ๆ", t: "I" },
+        { q: "คุณมองเหตุการณ์ที่เกิดขึ้นว่า...", a: "ทุกอย่างมีที่มาและผลลัพธ์", b: "ทุกอย่างเป็นเรื่องของจังหวะ", t: "NJ" },
+        { q: "การแก้ปัญหาเฉพาะหน้าของคุณคือ...", a: "ใช้ตรรกะวิเคราะห์สาเหตุ", b: "ใช้สัญชาตญาณความรู้สึก", t: "TP" },
+        { q: "คุณเชื่อมั่นใน...", a: "ข้อมูลที่พิสูจน์ได้จริง", b: "ลางสังหรณ์ที่อธิบายไม่ได้", t: "SJ" },
+        { q: "เวลาคุยกับเพื่อนที่กำลังเศร้า...", a: "คุณพยายามหาทางออกให้", b: "คุณพยายามเข้าใจความรู้สึก", t: "FJ" },
+        { q: "คุณชอบทำงานในสภาวะที่...", a: "มีโครงสร้างระเบียบชัดเจน", b: "มีอิสระในการปรับเปลี่ยน", t: "SJ" },
+        { q: "คุณมักจะสังเกตเห็น...", a: "รูปแบบที่ซ่อนอยู่หลังความจริง", b: "รายละเอียดที่ผิดปกติไป", t: "NJ" },
+        { q: "คำชมแบบไหนที่คุณชอบที่สุด...", a: "คุณคือคนที่มีวิสัยทัศน์", b: "คุณคือคนที่พึ่งพาได้เสมอ", t: "NJ" },
+        { q: "ถ้าโลกนี้ไม่มีกฎเกณฑ์...", a: "คุณจะสร้างระบบขึ้นมาใหม่เอง", b: "คุณจะสนุกกับอิสระที่มี", t: "TJ" },
+        { q: "ความผิดพลาดในอดีตสำหรับคุณคือ...", a: "บทเรียนที่ต้องไม่เกิดซ้ำ", b: "เรื่องที่จบไปแล้วไม่ต้องคิด", t: "SJ" },
+        { q: "คุณมักจะสงสัยใน...", a: "เจตนาที่ซ่อนอยู่ของคนอื่น", b: "ความถูกต้องของข้อมูลคนอื่น", t: "FJ" },
+        { q: "เป้าหมายสูงสุดของคุณคือ...", a: "การสร้างสิ่งที่ยั่งยืนและลึกซึ้ง", b: "การใช้ชีวิตให้คุ้มค่าที่สุด", t: "NJ" }
     ];
 
-    let current = 0;
-    let stats = { Ni:0, Ne:0, Si:0, Se:0, Ti:0, Te:0, Fi:0, Fe:0 };
+    const descs = {
+        "INTJ": "จอมบงการหลังม่าน: มองโลกเป็นกระดานหมากรุก ทุกอย่างต้องมีประสิทธิภาพสูงสุด",
+        "INFJ": "สถาปนิกทางจิตวิญญาณ: เห็นรูปแบบที่คนอื่นไม่เห็น มีลางสังหรณ์แม่นยำจนน่ากลัว",
+        "INTP": "นักคิดวิเคราะห์จักรวาล: รักความถูกต้องของตรรกะ แต่มักลืมว่าต้องกินข้าวหรืออาบน้ำ",
+        "ENTP": "ทนายปีศาจ: รักการไล่ต้อนคนด้วยเหตุผล ความบันเทิงคือการเห็นช่องโหว่ในระบบคนอื่น",
+        "ENTJ": "ผู้บัญชาการเหล็ก: เปลี่ยนวิสัยทัศน์ให้เป็นความจริงด้วยระเบียบวินัยและการคุมบังเหียน",
+        "ENFJ": "ผู้นำจิตวิญญาณ: สร้างแรงบันดาลใจให้ผู้คน ดึงศักยภาพคนรอบข้างออกมาได้เหมือนเวทมนตร์",
+        "INFP": "นักฝันผู้ซื่อสัตย์: ยึดมั่นในคุณค่าตัวตนอย่างรุนแรง เงียบเชียบแต่ข้างในคือภูเขาไฟ",
+        "ENFP": "นักรณรงค์ผู้ร่าเริง: มองเห็นความเป็นไปได้ในทุกสิ่ง เบื่อง่ายแต่ไฟแรงสูงเสมอ",
+        "ISTJ": "สารวัตรเนี้ยบ: ถ้าโลกไม่มีคุณ ทุกอย่างคงพังเพราะขาดระเบียบ คุณคือฐานข้อมูลที่เดินได้",
+        "ISFJ": "ผู้ปกป้องที่แสนดี: จดจำรายละเอียดของคนที่รักได้แม่นยำ ทำงานหนักหลังไมค์แบบปิดทองหลังพระ",
+        "ESTJ": "ผู้บริหารจัดการ: ยึดมั่นในกฎเกณฑ์และจารีต เพื่อให้สังคมเดินไปได้อย่างถูกร่องถูกรอย",
+        "ESFJ": "ที่ปรึกษาผู้โอบอ้อม: กาวใจของกลุ่มเพื่อน สร้างบรรยากาศที่อบอุ่นและสามัคคีได้ดีที่สุด",
+        "ISTP": "ช่างฝีมืออัจฉริยะ: เงียบขรึมแต่แก้ปัญหาเฉพาะหน้าเก่งระดับเทพ รักอิสระและเครื่องยนต์",
+        "ISFP": "ศิลปินผู้รักสันโดษ: ถ่ายทอดความรู้สึกผ่านการกระทำ อยู่กับปัจจุบันอย่างลึกซึ้ง",
+        "ESTP": "ผู้กล้าท้าตาย: แอ็กชันก่อนคิดทีหลัง รักความตื่นเต้นและแก้ปัญหาหน้างานได้เฉียบขาด",
+        "ESFP": "นักแสดงผู้มีชีวิตชีวา: เปลี่ยนทุกที่ให้เป็นเวที ทำให้คนรอบข้างหัวเราะและลืมความเศร้า"
+    };
+
+    let step = 0;
+    let authScore = 100;
     let timer;
     let startTimestamp;
-    let authScore = 100;
+    let res = { I:0, E:0, N:0, S:0, T:0, F:0, J:0, P:0 };
 
     function init() {
         const container = document.getElementById('quiz-container');
-        questions.forEach((item, index) => {
-            container.innerHTML += `
-                <div id="q${index}" class="question-box ${index === 0 ? 'active' : ''}">
-                    <div class="q-text">> ${item.q}</div>
-                    <button class="btn" onclick="next('${item.f}', 'a')">${item.a}</button>
-                    <button class="btn" onclick="next('${item.f}', 'b')">${item.b}</button>
-                </div>`;
+        questions.forEach((q, i) => {
+            container.innerHTML += `<div id="q${i}" class="question-box ${i===0?'active':''}">
+                <div class="q-text">> ${q.q}</div>
+                <button class="btn" onclick="handle('${q.t}', 'a')">${q.a}</button>
+                <button class="btn" onclick="handle('${q.t}', 'b')">${q.b}</button>
+            </div>`;
         });
         startTimer();
     }
@@ -84,53 +103,60 @@
         let timeLeft = 100;
         startTimestamp = Date.now();
         timer = setInterval(() => {
-            timeLeft -= 2; // 5 วินาทีต่อข้อ
+            timeLeft -= 2.5; // 4 วินาทีต่อข้อ
             document.getElementById('timer-line').style.width = timeLeft + "%";
-            if (timeLeft <= 0) { next('none', 'none'); }
+            if(timeLeft <= 0) { handle('none', 'none'); }
         }, 100);
     }
 
-    function next(func, choice) {
+    function handle(type, choice) {
         clearInterval(timer);
-        const reaction = (Date.now() - startTimestamp) / 1000;
-        if (reaction > 3.8) authScore -= 5; // ดักลังเล: เกิน 3.8 วินาที หักคะแนนความมั่นใจ
+        let reaction = (Date.now() - startTimestamp) / 1000;
+        if(reaction > 3.5) authScore -= 5;
 
-        if (choice === 'a') stats[func]++; 
-        
-        document.getElementById(`q${current}`).classList.remove('active');
-        current++;
-        
-        if (current < questions.length) {
-            document.getElementById('counter').innerText = `ANALYZING_STEP_${current + 1}_OF_20...`;
-            document.getElementById(`q${current}`).classList.add('active');
-            startTimer();
-        } else {
-            showResult();
+        if(choice === 'a') {
+            type.split('').forEach(char => res[char]++);
+        } else if(choice === 'b') {
+            // Logic ตรงข้าม
+            if(type === 'I') res.E++;
+            if(type.includes('N')) res.S++;
+            if(type.includes('T')) res.F++;
+            if(type.includes('J')) res.P++;
         }
+
+        document.getElementById(`q${step}`).classList.remove('active');
+        step++;
+        if(step < questions.length) {
+            document.getElementById('counter').innerText = `STEP_${step+1}_OF_20...`;
+            document.getElementById(`q${step}`).classList.add('active');
+            startTimer();
+        } else { finish(); }
     }
 
-    function showResult() {
-        document.getElementById('quiz-container').style.display = 'none';
+    function finish() {
         document.querySelector('.progress-bar').style.display = 'none';
         document.getElementById('result').style.display = 'block';
-
-        // Logic ฟันธง 16 ไทป์ (ตัวอย่างการ Mapping เบื้องต้นจากฟังก์ชันหลัก)
-        let type = "";
-        if (stats.Ni > 3) type = stats.Te > stats.Fe ? "INTJ" : "INFJ";
-        else if (stats.Si > 2) type = "SJ_GROUP";
-        else type = "SP/NP_EXPLORER";
-
-        document.getElementById('final-type').innerText = type;
-        const tag = document.getElementById('auth-tag');
         
-        if (authScore > 70) {
+        let final = "";
+        final += (res.I >= res.E) ? "I" : "E";
+        final += (res.N >= res.S) ? "N" : "S";
+        final += (res.T >= res.F) ? "T" : "F";
+        final += (res.J >= res.P) ? "J" : "P";
+
+        document.getElementById('final-type').innerText = final;
+        const tag = document.getElementById('auth-tag');
+        const d = document.getElementById('logic-desc');
+
+        if(authScore > 75) {
             tag.innerText = "STATUS: PURE_ORIGINAL";
-            tag.style.borderColor = "var(--accent)";
             tag.style.color = "var(--accent)";
+            tag.style.borderColor = "var(--accent)";
+            d.innerText = descs[final] + " (ตัวตนเสถียรมาก ระบบยืนยันว่าไม่มีการปรุงแต่งคำตอบ)";
         } else {
             tag.innerText = "STATUS: MASKED_DETECTION";
-            tag.style.borderColor = "#ff4d4d";
-            tag.style.color = "#ff4d4d";
+            tag.style.color = "var(--danger)";
+            tag.style.borderColor = "var(--danger)";
+            d.innerText = descs[final] + " (ระบบตรวจพบความลังเล คุณอาจกำลังสวมบทบาทที่คุณไม่ได้เป็นจริงๆ)";
         }
     }
 
