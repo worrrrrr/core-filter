@@ -2,94 +2,107 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>The Slicer 16 | Ultimate Logic</title>
+    <title>The Slicer 16 | Ultimate Architect Logic</title>
     <style>
-        :root { --bg: #050505; --card: #111; --accent: #00ffcc; --text: #f0f0f0; --dim: #666; }
-        body { background: var(--bg); color: var(--text); font-family: 'Consolas', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        #app { width: 90%; max-width: 600px; background: var(--card); padding: 30px; border: 1px solid #222; border-radius: 5px; box-shadow: 0 0 20px rgba(0,255,204,0.1); }
-        .progress-container { width: 100%; height: 2px; background: #222; margin-bottom: 25px; }
-        #progress-bar { width: 100%; height: 100%; background: var(--accent); transition: width 0.1s linear; }
-        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: #fff; text-align: left; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
-        .btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+        :root { --bg: #050505; --card: #111; --accent: #00ffcc; --text: #f0f0f0; --dim: #444; }
+        body { background: var(--bg); color: var(--text); font-family: 'Consolas', 'Courier New', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        #app { width: 95%; max-width: 650px; background: var(--card); padding: 40px; border: 1px solid #222; position: relative; }
+        .progress-bar { width: 100%; height: 2px; background: #222; margin-bottom: 30px; position: relative; }
+        #timer-line { width: 100%; height: 100%; background: var(--accent); transition: width 0.1s linear; }
+        .q-text { font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5; color: var(--accent); }
+        .btn { display: block; width: 100%; padding: 18px; margin: 12px 0; background: #181818; border: 1px solid #333; color: #fff; text-align: left; cursor: pointer; transition: 0.2s; }
+        .btn:hover { background: #fff; color: #000; border-color: #fff; }
         .question-box { display: none; }
-        .question-box.active { display: block; animation: slideIn 0.3s ease; }
+        .question-box.active { display: block; }
         #result { display: none; text-align: center; }
-        .type-title { font-size: 2.5rem; color: var(--accent); margin-bottom: 10px; text-shadow: 0 0 15px rgba(0,255,204,0.5); }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+        .verdict { font-size: 3rem; font-weight: bold; margin: 20px 0; letter-spacing: -2px; }
+        .status-tag { display: inline-block; padding: 5px 15px; border: 1px solid; margin-bottom: 20px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div class="progress-container"><div id="progress-bar"></div></div>
-    
-    <div id="q1" class="question-box active">
-        <p>> การชาร์จพลังงานของคุณมาจากไหน?</p>
-        <button class="btn" onclick="select('E')">A: การออกไปเจอผู้คน/สภาพแวดล้อมใหม่ๆ (Extravert)</button>
-        <button class="btn" onclick="select('I')">B: การอยู่กับตัวเองในพื้นที่ส่วนตัว (Introvert)</button>
-    </div>
+    <div class="progress-bar"><div id="timer-line"></div></div>
+    <div id="counter" style="font-size: 0.7rem; color: var(--dim); margin-bottom: 10px;">SCANNING...</div>
 
-    <div id="q2" class="question-box">
-        <p>> คุณประมวลผลข้อมูลแบบไหน?</p>
-        <button class="btn" onclick="select('N')">A: มองภาพรวม วิสัยทัศน์ และความเป็นไปได้ (Intuition)</button>
-        <button class="btn" onclick="select('S')">B: มองข้อเท็จจริง ประสบการณ์ และรายละเอียด (Sensing)</button>
-    </div>
-
-    <div id="q3" class="question-box">
-        <p>> คุณตัดสินใจด้วยอะไรเป็นหลัก?</p>
-        <button class="btn" onclick="select('T')">A: ตรรกะ เหตุผล และความถูกต้อง (Thinking)</button>
-        <button class="btn" onclick="select('F')">B: ความรู้สึก ค่านิยม และความเข้าอกเข้าใจ (Feeling)</button>
-    </div>
-
-    <div id="q4" class="question-box">
-        <p>> รูปแบบการใช้ชีวิตของคุณเป็นอย่างไร?</p>
-        <button class="btn" onclick="select('J')">A: มีแบบแผน ชัดเจน และชอบข้อสรุป (Judging)</button>
-        <button class="btn" onclick="select('P')">B: ยืดหยุ่น ไหลตามสถานการณ์ และเปิดรับสิ่งใหม่ (Perceiving)</button>
-    </div>
+    <div id="quiz-container"></div>
 
     <div id="result">
-        <div style="font-size: 0.8rem; color: var(--dim);">[ ANALYSIS_VERDICT ]</div>
-        <div class="type-title" id="final-type">---</div>
-        <div id="auth-tag" style="font-weight: bold;"></div>
-        <p id="desc" style="margin-top: 20px; line-height: 1.6; color: #ccc;"></p>
-        <button class="btn" style="text-align: center; margin-top: 30px;" onclick="location.reload()">RE-CALIBRATE</button>
+        <div style="font-size: 0.8rem; color: var(--dim);">[ ANALYSIS_RESULT ]</div>
+        <div id="final-type" class="verdict">---</div>
+        <div id="auth-tag" class="status-tag">---</div>
+        <p id="logic-desc" style="line-height: 1.8; color: #888;"></p>
+        <button class="btn" style="text-align: center; margin-top: 30px;" onclick="location.reload()">RE-INITIALIZE SYSTEM</button>
     </div>
 </div>
 
 <script>
-    let userType = "";
-    let step = 1;
+    // คำถาม 20 ข้อที่คุณไฟเขียว (ตัดวงเล็บออก)
+    const questions = [
+        { q: "เวลาเจอโปรเจกต์ใหม่ คุณมักจะ...", a: "มองหาภาพสุดท้ายที่สำเร็จ", b: "รวบรวมข้อมูลที่มีทั้งหมดก่อน", f: "Ni" },
+        { q: "คุณตัดสินใจเลือกทางเดินชีวิตจาก...", a: "สิ่งที่คาดเดาว่าจะเกิดขึ้น", b: "สิ่งที่เคยทำได้ดีในอดีต", f: "Ni" },
+        { q: "เวลาอธิบายงาน คุณชอบพูดถึง...", a: "คอนเซปต์และไอเดียภาพรวม", b: "ขั้นตอนและรายละเอียดที่ชัดเจน", f: "Ne" },
+        { q: "คุณรู้สึกมีพลังมากที่สุดเมื่อ...", a: "เชื่อมโยงจุดต่างๆ เป็นภาพเดียว", b: "ทดลองทำไอเดียใหม่ๆ ไปเรื่อยๆ", f: "Ni" },
+        { q: "ในวงสนทนา คุณมักจะ...", a: "รับรู้ความรู้สึกของคนรอบข้าง", b: "ยึดมั่นในเหตุผลและความจริง", f: "Fe" },
+        { q: "ถ้าต้องวิจารณ์งานคนอื่น คุณจะ...", a: "พูดตรงๆ ตามเนื้อผ้า", b: "รักษาน้ำใจและบรรยากาศ", f: "Te" },
+        { q: "คุณจัดการความเครียดด้วยการ...", a: "วางแผนหาทางออกที่เป็นระบบ", b: "ทำตามความรู้สึกที่อยากทำ", f: "Te" },
+        { q: "สิ่งที่ทำให้คุณหงุดหงิดที่สุดคือ...", a: "การทำงานที่ไร้ประสิทธิภาพ", b: "การถูกละเมิดตัวตนและคุณค่า", f: "Te" },
+        { q: "เวลาว่างคุณชอบที่จะ...", a: "อยู่ในโลกแห่งความคิด", b: "มองหาสิ่งกระตุ้นใหม่ๆ รอบตัว", f: "Ti" },
+        { q: "คุณมองเหตุการณ์ที่เกิดขึ้นว่า...", a: "ทุกอย่างมีที่มาและผลลัพธ์", b: "ทุกอย่างเป็นเรื่องของจังหวะ", f: "Ni" },
+        { q: "การแก้ปัญหาเฉพาะหน้าของคุณคือ...", a: "ใช้ตรรกะวิเคราะห์สาเหตุ", b: "ใช้สัญชาตญาณความรู้สึก", f: "Ti" },
+        { q: "คุณเชื่อมั่นใน...", a: "ข้อมูลที่พิสูจน์ได้จริง", b: "ลางสังหรณ์ที่อธิบายไม่ได้", f: "Si" },
+        { q: "เวลาคุยกับเพื่อนที่กำลังเศร้า...", a: "คุณพยายามหาทางออกให้", b: "คุณพยายามเข้าใจความรู้สึก", f: "Fe" },
+        { q: "คุณชอบทำงานในสภาวะที่...", a: "มีโครงสร้างระเบียบชัดเจน", b: "มีอิสระในการปรับเปลี่ยน", f: "Si" },
+        { q: "คุณมักจะสังเกตเห็น...", a: "รูปแบบ (Pattern) ที่ซ่อนอยู่", b: "รายละเอียด (Detail) ที่ผิดไป", f: "Ni" },
+        { q: "คำชมแบบไหนที่คุณชอบที่สุด...", a: "คุณคือคนที่มีวิสัยทัศน์", b: "คุณคือคนที่ไว้ใจได้เสมอ", f: "Ni" },
+        { q: "ถ้าโลกนี้ไม่มีกฎเกณฑ์...", a: "คุณจะสร้างกฎขึ้นมาใหม่เอง", b: "คุณจะสนุกกับเสรีภาพที่มี", f: "Te" },
+        { q: "ความผิดพลาดในอดีตสำหรับคุณคือ...", a: "บทเรียนที่ต้องไม่เกิดซ้ำ", b: "เรื่องที่จบไปแล้วไม่ต้องคิด", f: "Si" },
+        { q: "คุณมักจะสงสัยใน...", a: "เจตนาที่แท้จริงของคนอื่น", b: "ความถูกต้องของข้อมูลคนอื่น", f: "Fe" },
+        { q: "เป้าหมายสูงสุดของคุณคือ...", a: "การสร้างสิ่งที่ยั่งยืนและลึกซึ้ง", b: "การใช้ชีวิตให้คุ้มค่าที่สุด", f: "Ni" }
+    ];
+
+    let current = 0;
+    let stats = { Ni:0, Ne:0, Si:0, Se:0, Ti:0, Te:0, Fi:0, Fe:0 };
     let timer;
     let startTimestamp;
-    let totalAuthenticity = 100;
+    let authScore = 100;
+
+    function init() {
+        const container = document.getElementById('quiz-container');
+        questions.forEach((item, index) => {
+            container.innerHTML += `
+                <div id="q${index}" class="question-box ${index === 0 ? 'active' : ''}">
+                    <div class="q-text">> ${item.q}</div>
+                    <button class="btn" onclick="next('${item.f}', 'a')">${item.a}</button>
+                    <button class="btn" onclick="next('${item.f}', 'b')">${item.b}</button>
+                </div>`;
+        });
+        startTimer();
+    }
 
     function startTimer() {
         let timeLeft = 100;
         startTimestamp = Date.now();
         timer = setInterval(() => {
-            timeLeft -= 1.5; // ประมาณ 6-7 วินาทีต่อข้อ
-            document.getElementById('progress-bar').style.width = timeLeft + "%";
-            if (timeLeft <= 0) { clearInterval(timer); select('Late'); }
+            timeLeft -= 2; // 5 วินาทีต่อข้อ
+            document.getElementById('timer-line').style.width = timeLeft + "%";
+            if (timeLeft <= 0) { next('none', 'none'); }
         }, 100);
     }
 
-    function select(choice) {
+    function next(func, choice) {
         clearInterval(timer);
-        let timeUsed = (Date.now() - startTimestamp) / 1000;
+        const reaction = (Date.now() - startTimestamp) / 1000;
+        if (reaction > 3.8) authScore -= 5; // ดักลังเล: เกิน 3.8 วินาที หักคะแนนความมั่นใจ
+
+        if (choice === 'a') stats[func]++; 
         
-        // ตรรกะจับลังเล: ถ้าคิดนานเกิน 3.5 วินาทีต่อข้อ หักคะแนนความมั่นใจ
-        if (timeUsed > 3.5 || choice === 'Late') {
-            totalAuthenticity -= 25;
-        }
-
-        if (choice !== 'Late') userType += choice;
-        else userType += "X"; // X หมายถึงระบุไม่ได้เพราะลังเลเกินไป
-
-        document.getElementById(`q${step}`).classList.remove('active');
-        step++;
-
-        if (step <= 4) {
-            document.getElementById(`q${step}`).classList.add('active');
+        document.getElementById(`q${current}`).classList.remove('active');
+        current++;
+        
+        if (current < questions.length) {
+            document.getElementById('counter').innerText = `ANALYZING_STEP_${current + 1}_OF_20...`;
+            document.getElementById(`q${current}`).classList.add('active');
             startTimer();
         } else {
             showResult();
@@ -97,32 +110,31 @@
     }
 
     function showResult() {
-        document.querySelector('.progress-container').style.display = 'none';
+        document.getElementById('quiz-container').style.display = 'none';
+        document.querySelector('.progress-bar').style.display = 'none';
         document.getElementById('result').style.display = 'block';
+
+        // Logic ฟันธง 16 ไทป์ (ตัวอย่างการ Mapping เบื้องต้นจากฟังก์ชันหลัก)
+        let type = "";
+        if (stats.Ni > 3) type = stats.Te > stats.Fe ? "INTJ" : "INFJ";
+        else if (stats.Si > 2) type = "SJ_GROUP";
+        else type = "SP/NP_EXPLORER";
+
+        document.getElementById('final-type').innerText = type;
+        const tag = document.getElementById('auth-tag');
         
-        // ถ้าตอบไม่ทันหรือลังเลจนได้ X
-        let finalType = userType.includes("X") ? "UNCLEAR" : userType;
-        document.getElementById('final-type').innerText = finalType;
-
-        const authTag = document.getElementById('auth-tag');
-        if (totalAuthenticity >= 75) {
-            authTag.innerText = "[ STATUS: PURE_ORIGINAL ]";
-            authTag.style.color = "var(--accent)";
+        if (authScore > 70) {
+            tag.innerText = "STATUS: PURE_ORIGINAL";
+            tag.style.borderColor = "var(--accent)";
+            tag.style.color = "var(--accent)";
         } else {
-            authTag.innerText = "[ STATUS: MASKED_OR_HESITATED ]";
-            authTag.style.color = "#ff4d4d";
+            tag.innerText = "STATUS: MASKED_DETECTION";
+            tag.style.borderColor = "#ff4d4d";
+            tag.style.color = "#ff4d4d";
         }
-
-        let description = `ระบบตรวจพบว่าคุณมีลักษณะการใช้ชีวิตแบบ ${finalType}. `;
-        if (totalAuthenticity < 75) {
-            description += "อย่างไรก็ตาม ความล่าช้าในการตอบสนองบ่งบอกว่าคุณกำลังใช้ 'สมองส่วนคิด' เพื่อปรุงแต่งคำตอบ มากกว่าการใช้ 'สัญชาตญาณ' (Mistype Risk High).";
-        } else {
-            description += "ความเร็วในการประมวลผลของคุณอยู่ในเกณฑ์เสถียร ยืนยันว่านี่คือตัวตนที่แท้จริงของคุณในปัจจุบัน.";
-        }
-        document.getElementById('desc').innerText = description;
     }
 
-    startTimer();
+    init();
 </script>
 </body>
 </html>
