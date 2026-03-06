@@ -2,115 +2,124 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Slicer 16 | Logic 100</title>
+    <title>The Slicer 16 | Ultimate Logic</title>
     <style>
-        :root { --bg: #0d0d0d; --card: #161616; --accent: #00ffcc; --danger: #ff4d4d; --text: #e0e0e0; }
-        body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        #app { width: 95%; max-width: 550px; background: var(--card); padding: 2rem; border: 1px solid #333; border-radius: 2px; }
-        #timer-bar { width: 100%; height: 5px; background: var(--accent); transition: width 0.1s linear; margin-bottom: 20px; }
+        :root { --bg: #050505; --card: #111; --accent: #00ffcc; --text: #f0f0f0; --dim: #666; }
+        body { background: var(--bg); color: var(--text); font-family: 'Consolas', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        #app { width: 90%; max-width: 600px; background: var(--card); padding: 30px; border: 1px solid #222; border-radius: 5px; box-shadow: 0 0 20px rgba(0,255,204,0.1); }
+        .progress-container { width: 100%; height: 2px; background: #222; margin-bottom: 25px; }
+        #progress-bar { width: 100%; height: 100%; background: var(--accent); transition: width 0.1s linear; }
+        .btn { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: #fff; text-align: left; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
         .question-box { display: none; }
-        .question-box.active { display: block; }
-        .btn { display: block; width: 100%; padding: 1rem; margin: 10px 0; background: #1f1f1f; border: 1px solid #444; color: #fff; text-align: left; cursor: pointer; }
-        .btn:hover { border-color: var(--accent); background: #252525; }
-        .result-screen { display: none; text-align: center; }
-        .auth-high { color: var(--accent); }
-        .auth-low { color: var(--danger); }
+        .question-box.active { display: block; animation: slideIn 0.3s ease; }
+        #result { display: none; text-align: center; }
+        .type-title { font-size: 2.5rem; color: var(--accent); margin-bottom: 10px; text-shadow: 0 0 15px rgba(0,255,204,0.5); }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="timer-bar"></div>
-    <div id="status-bar" style="font-size: 0.7rem; color: #555; margin-bottom: 15px;">[ SYSTEM_READY: WAITING_FOR_INPUT ]</div>
-
+    <div class="progress-container"><div id="progress-bar"></div></div>
+    
     <div id="q1" class="question-box active">
-        <p>> เดาอนาคตแม่นเพราะอะไร?</p>
-        <button class="btn" onclick="process('Ni')">A: ภาพมันวาบขึ้นมาเองเหมือนเห็นตอนจบ (Ni)</button>
-        <button class="btn" onclick="process('Si')">B: จำสัญญาณเก่าๆ ได้จากอดีต (Si)</button>
+        <p>> การชาร์จพลังงานของคุณมาจากไหน?</p>
+        <button class="btn" onclick="select('E')">A: การออกไปเจอผู้คน/สภาพแวดล้อมใหม่ๆ (Extravert)</button>
+        <button class="btn" onclick="select('I')">B: การอยู่กับตัวเองในพื้นที่ส่วนตัว (Introvert)</button>
     </div>
 
     <div id="q2" class="question-box">
-        <p>> การทำงานที่ซับซ้อน?</p>
-        <button class="btn" onclick="process('J')">A: ต้องอ่านคู่มือ/เห็นพิมพ์เขียวทั้งหมดก่อน (J)</button>
-        <button class="btn" onclick="process('P')">B: ลุยไปก่อน ติดแล้วค่อยแก้หน้างาน (P)</button>
+        <p>> คุณประมวลผลข้อมูลแบบไหน?</p>
+        <button class="btn" onclick="select('N')">A: มองภาพรวม วิสัยทัศน์ และความเป็นไปได้ (Intuition)</button>
+        <button class="btn" onclick="select('S')">B: มองข้อเท็จจริง ประสบการณ์ และรายละเอียด (Sensing)</button>
     </div>
 
     <div id="q3" class="question-box">
-        <p>> การตัดสินใจสำคัญ?</p>
-        <button class="btn" onclick="process('T')">A: ตรรกะและความถูกต้องต้องมาก่อน (T)</button>
-        <button class="btn" onclick="process('F')">B: ความรู้สึกและคุณค่าความเป็นคนต้องมาก่อน (F)</button>
+        <p>> คุณตัดสินใจด้วยอะไรเป็นหลัก?</p>
+        <button class="btn" onclick="select('T')">A: ตรรกะ เหตุผล และความถูกต้อง (Thinking)</button>
+        <button class="btn" onclick="select('F')">B: ความรู้สึก ค่านิยม และความเข้าอกเข้าใจ (Feeling)</button>
     </div>
 
-    <div id="result" class="result-screen">
-        <h2 id="type-verdict" style="margin-bottom: 5px;"></h2>
-        <div id="auth-status" style="font-weight: bold; margin-bottom: 20px;"></div>
-        <p id="logic-detail" style="font-size: 0.9rem; color: #aaa; line-height: 1.6;"></p>
-        <button class="btn" style="text-align: center;" onclick="location.reload()">RE-SCAN SYSTEM</button>
+    <div id="q4" class="question-box">
+        <p>> รูปแบบการใช้ชีวิตของคุณเป็นอย่างไร?</p>
+        <button class="btn" onclick="select('J')">A: มีแบบแผน ชัดเจน และชอบข้อสรุป (Judging)</button>
+        <button class="btn" onclick="select('P')">B: ยืดหยุ่น ไหลตามสถานการณ์ และเปิดรับสิ่งใหม่ (Perceiving)</button>
+    </div>
+
+    <div id="result">
+        <div style="font-size: 0.8rem; color: var(--dim);">[ ANALYSIS_VERDICT ]</div>
+        <div class="type-title" id="final-type">---</div>
+        <div id="auth-tag" style="font-weight: bold;"></div>
+        <p id="desc" style="margin-top: 20px; line-height: 1.6; color: #ccc;"></p>
+        <button class="btn" style="text-align: center; margin-top: 30px;" onclick="location.reload()">RE-CALIBRATE</button>
     </div>
 </div>
 
 <script>
-    let scores = { Ni:0, Si:0, J:0, P:0, T:0, F:0 };
+    let userType = "";
     let step = 1;
-    let timerInterval;
+    let timer;
     let startTimestamp;
-    let authenticityScore = 100;
+    let totalAuthenticity = 100;
 
     function startTimer() {
         let timeLeft = 100;
         startTimestamp = Date.now();
-        document.getElementById('status-bar').innerText = `[ ANALYZING_STEP_${step}: MONITORING_REACTION_TIME ]`;
-        timerInterval = setInterval(() => {
-            timeLeft -= 1.33; // ประมาณ 7.5 วินาทีต่อข้อ
-            document.getElementById('timer-bar').style.width = timeLeft + "%";
-            if (timeLeft <= 0) { clearInterval(timerInterval); process('Late'); }
+        timer = setInterval(() => {
+            timeLeft -= 1.5; // ประมาณ 6-7 วินาทีต่อข้อ
+            document.getElementById('progress-bar').style.width = timeLeft + "%";
+            if (timeLeft <= 0) { clearInterval(timer); select('Late'); }
         }, 100);
     }
 
-    function process(attr) {
-        clearInterval(timerInterval);
-        let reactionTime = Date.now() - startTimestamp;
+    function select(choice) {
+        clearInterval(timer);
+        let timeUsed = (Date.now() - startTimestamp) / 1000;
+        
+        // ตรรกะจับลังเล: ถ้าคิดนานเกิน 3.5 วินาทีต่อข้อ หักคะแนนความมั่นใจ
+        if (timeUsed > 3.5 || choice === 'Late') {
+            totalAuthenticity -= 25;
+        }
 
-        // --- Logic จับความลังเล (ตัดหาลังเลด้านหลัง) ---
-        if (reactionTime > 4000) authenticityScore -= 30; // ถ้าช้าเกิน 4 วิ หักความมั่นใจ
-        if (attr !== 'Late') scores[attr]++;
+        if (choice !== 'Late') userType += choice;
+        else userType += "X"; // X หมายถึงระบุไม่ได้เพราะลังเลเกินไป
 
         document.getElementById(`q${step}`).classList.remove('active');
         step++;
 
-        if (step <= 3) {
+        if (step <= 4) {
             document.getElementById(`q${step}`).classList.add('active');
             startTimer();
         } else {
-            showVerdict();
+            showResult();
         }
     }
 
-    function showVerdict() {
-        document.getElementById('timer-bar').style.display = 'none';
-        document.getElementById('status-bar').innerText = "[ ANALYSIS_COMPLETE ]";
+    function showResult() {
+        document.querySelector('.progress-container').style.display = 'none';
         document.getElementById('result').style.display = 'block';
+        
+        // ถ้าตอบไม่ทันหรือลังเลจนได้ X
+        let finalType = userType.includes("X") ? "UNCLEAR" : userType;
+        document.getElementById('final-type').innerText = finalType;
 
-        let type = scores.Ni > 0 ? "INFJ/INTJ (Architect)" : "Sensing Group";
-        let authText = "";
-        let authClass = "";
-
-        if (authenticityScore >= 80) {
-            authText = "[ STATUS: AUTHENTIC ]";
-            authClass = "auth-high";
+        const authTag = document.getElementById('auth-tag');
+        if (totalAuthenticity >= 75) {
+            authTag.innerText = "[ STATUS: PURE_ORIGINAL ]";
+            authTag.style.color = "var(--accent)";
         } else {
-            authText = "[ STATUS: HESITATED / MASKED ]";
-            authClass = "auth-low";
+            authTag.innerText = "[ STATUS: MASKED_OR_HESITATED ]";
+            authTag.style.color = "#ff4d4d";
         }
 
-        document.getElementById('type-verdict').innerText = type;
-        document.getElementById('auth-status').innerText = authText;
-        document.getElementById('auth-status').className = authClass;
-        document.getElementById('logic-detail').innerText = 
-            (authenticityScore < 80) ? 
-            "ระบบตรวจพบความล่าช้าในการตอบสนอง คุณมีสิทธิ์ที่จะพยายามตอบตามความคาดหวัง หรือกำลังติด Loop บางอย่างที่ทำให้ตัวตนไม่เสถียร" :
-            "ตรรกะของคุณเสถียรมาก การตัดสินใจรวดเร็วบ่งบอกถึงการใช้ฟังก์ชันหลักจากสัญชาตญาณจริง";
+        let description = `ระบบตรวจพบว่าคุณมีลักษณะการใช้ชีวิตแบบ ${finalType}. `;
+        if (totalAuthenticity < 75) {
+            description += "อย่างไรก็ตาม ความล่าช้าในการตอบสนองบ่งบอกว่าคุณกำลังใช้ 'สมองส่วนคิด' เพื่อปรุงแต่งคำตอบ มากกว่าการใช้ 'สัญชาตญาณ' (Mistype Risk High).";
+        } else {
+            description += "ความเร็วในการประมวลผลของคุณอยู่ในเกณฑ์เสถียร ยืนยันว่านี่คือตัวตนที่แท้จริงของคุณในปัจจุบัน.";
+        }
+        document.getElementById('desc').innerText = description;
     }
 
     startTimer();
