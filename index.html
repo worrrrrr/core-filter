@@ -1,144 +1,119 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MBTI Process Checker</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .card {
-      background: white;
-      padding: 24px;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      max-width: 500px;
-      width: 100%;
-    }
-    h1 {
-      text-align: center;
-    }
-    .question {
-      margin: 20px 0;
-    }
-    button {
-      display: block;
-      width: 100%;
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      background: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #f0f0f0;
-    }
-    .result {
-      text-align: center;
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Slicer 16 | Logic 100</title>
+    <style>
+        :root { --bg: #0d0d0d; --card: #161616; --accent: #00ffcc; --danger: #ff4d4d; --text: #e0e0e0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        #app { width: 95%; max-width: 550px; background: var(--card); padding: 2rem; border: 1px solid #333; border-radius: 2px; }
+        #timer-bar { width: 100%; height: 5px; background: var(--accent); transition: width 0.1s linear; margin-bottom: 20px; }
+        .question-box { display: none; }
+        .question-box.active { display: block; }
+        .btn { display: block; width: 100%; padding: 1rem; margin: 10px 0; background: #1f1f1f; border: 1px solid #444; color: #fff; text-align: left; cursor: pointer; }
+        .btn:hover { border-color: var(--accent); background: #252525; }
+        .result-screen { display: none; text-align: center; }
+        .auth-high { color: var(--accent); }
+        .auth-low { color: var(--danger); }
+    </style>
 </head>
 <body>
-  <div class="card">
-    <h1>MBTI Process Checker</h1>
-    <div id="app"></div>
-  </div>
 
-  <script>
-    const questions = [
-      {
-        text: "ถ้าคุณทำอะไรสักอย่างคนเดียว ไม่มีใครเกี่ยวข้อง คุณจะเป็นแบบไหน?",
-        options: [
-          { label: "ยังสนุกกับการวางแผนและทำให้มันมีระบบ", type: "INTJ" },
-          { label: "รู้สึกเฉยลง ถ้าไม่มีความเกี่ยวข้องกับคนหรือความหมาย", type: "INFJ" },
-          { label: "ดูที่ความรู้สึกตัวเองก่อน ว่าอยากทำไหม", type: "ISFP" }
-        ]
-      },
-      {
-        text: "เวลาต้องเลือกเรื่องสำคัญ คุณดูอะไรเป็นหลัก?",
-        options: [
-          { label: "อะไรที่ทำให้สำเร็จและควบคุมผลได้ดีที่สุด", type: "INTJ" },
-          { label: "อะไรที่ตรงกับภาพอนาคตที่ฉันมองเห็น", type: "INFJ" },
-          { label: "อะไรที่ไม่ขัดกับความรู้สึกหรือคุณค่าของฉัน", type: "ISFP" }
-        ]
-      },
-      {
-        text: "ตอนเครียดมาก ๆ คุณมักจะ…",
-        options: [
-          { label: "คุมทุกอย่างเอง จัดการให้มันเข้าที่", type: "INTJ" },
-          { label: "เงียบลง เข้าไปคิดคนเดียวลึก ๆ", type: "INFJ" },
-          { label: "ถอยออกมา ปกป้องตัวเองก่อน", type: "ISFP" }
-        ]
-      },
-      {
-        text: "เวลาอยู่กับคนใหม่ ๆ แล้วคุณเงียบ เพราะอะไรบ่อยสุด?",
-        options: [
-          { label: "ยังไม่มีอะไรที่ต้องเข้าไปจัดการ", type: "INTJ" },
-          { label: "กำลังดูจังหวะและอ่านบรรยากาศ", type: "INFJ" },
-          { label: "ยังไม่รู้สึกสบายใจพอจะเปิดตัวเอง", type: "ISFP" }
-        ]
-      }
-    ];
+<div id="app">
+    <div id="timer-bar"></div>
+    <div id="status-bar" style="font-size: 0.7rem; color: #555; margin-bottom: 15px;">[ SYSTEM_READY: WAITING_FOR_INPUT ]</div>
 
-    let current = 0;
-    let answers = [];
+    <div id="q1" class="question-box active">
+        <p>> เดาอนาคตแม่นเพราะอะไร?</p>
+        <button class="btn" onclick="process('Ni')">A: ภาพมันวาบขึ้นมาเองเหมือนเห็นตอนจบ (Ni)</button>
+        <button class="btn" onclick="process('Si')">B: จำสัญญาณเก่าๆ ได้จากอดีต (Si)</button>
+    </div>
 
-    const app = document.getElementById("app");
+    <div id="q2" class="question-box">
+        <p>> การทำงานที่ซับซ้อน?</p>
+        <button class="btn" onclick="process('J')">A: ต้องอ่านคู่มือ/เห็นพิมพ์เขียวทั้งหมดก่อน (J)</button>
+        <button class="btn" onclick="process('P')">B: ลุยไปก่อน ติดแล้วค่อยแก้หน้างาน (P)</button>
+    </div>
 
-    function renderQuestion() {
-      const q = questions[current];
-      app.innerHTML = `
-        <div class="question">
-          <p>${q.text}</p>
-          ${q.options
-            .map(
-              (opt) =>
-                `<button onclick="selectAnswer('${opt.type}')">${opt.label}</button>`
-            )
-            .join("")}
-        </div>
-      `;
+    <div id="q3" class="question-box">
+        <p>> การตัดสินใจสำคัญ?</p>
+        <button class="btn" onclick="process('T')">A: ตรรกะและความถูกต้องต้องมาก่อน (T)</button>
+        <button class="btn" onclick="process('F')">B: ความรู้สึกและคุณค่าความเป็นคนต้องมาก่อน (F)</button>
+    </div>
+
+    <div id="result" class="result-screen">
+        <h2 id="type-verdict" style="margin-bottom: 5px;"></h2>
+        <div id="auth-status" style="font-weight: bold; margin-bottom: 20px;"></div>
+        <p id="logic-detail" style="font-size: 0.9rem; color: #aaa; line-height: 1.6;"></p>
+        <button class="btn" style="text-align: center;" onclick="location.reload()">RE-SCAN SYSTEM</button>
+    </div>
+</div>
+
+<script>
+    let scores = { Ni:0, Si:0, J:0, P:0, T:0, F:0 };
+    let step = 1;
+    let timerInterval;
+    let startTimestamp;
+    let authenticityScore = 100;
+
+    function startTimer() {
+        let timeLeft = 100;
+        startTimestamp = Date.now();
+        document.getElementById('status-bar').innerText = `[ ANALYZING_STEP_${step}: MONITORING_REACTION_TIME ]`;
+        timerInterval = setInterval(() => {
+            timeLeft -= 1.33; // ประมาณ 7.5 วินาทีต่อข้อ
+            document.getElementById('timer-bar').style.width = timeLeft + "%";
+            if (timeLeft <= 0) { clearInterval(timerInterval); process('Late'); }
+        }, 100);
     }
 
-    function selectAnswer(type) {
-      answers.push(type);
-      current++;
-      if (current < questions.length) {
-        renderQuestion();
-      } else {
-        showResult();
-      }
+    function process(attr) {
+        clearInterval(timerInterval);
+        let reactionTime = Date.now() - startTimestamp;
+
+        // --- Logic จับความลังเล (ตัดหาลังเลด้านหลัง) ---
+        if (reactionTime > 4000) authenticityScore -= 30; // ถ้าช้าเกิน 4 วิ หักความมั่นใจ
+        if (attr !== 'Late') scores[attr]++;
+
+        document.getElementById(`q${step}`).classList.remove('active');
+        step++;
+
+        if (step <= 3) {
+            document.getElementById(`q${step}`).classList.add('active');
+            startTimer();
+        } else {
+            showVerdict();
+        }
     }
 
-    function showResult() {
-      const count = {};
-      answers.forEach((a) => {
-        count[a] = (count[a] || 0) + 1;
-      });
+    function showVerdict() {
+        document.getElementById('timer-bar').style.display = 'none';
+        document.getElementById('status-bar').innerText = "[ ANALYSIS_COMPLETE ]";
+        document.getElementById('result').style.display = 'block';
 
-      const result = Object.keys(count).reduce((a, b) =>
-        count[a] > count[b] ? a : b
-      );
+        let type = scores.Ni > 0 ? "INFJ/INTJ (Architect)" : "Sensing Group";
+        let authText = "";
+        let authClass = "";
 
-      app.innerHTML = `
-        <div class="result">
-          <h2>ผลลัพธ์ของคุณ</h2>
-          <p><strong>${result}</strong></p>
-          <button onclick="location.reload()">ทำใหม่</button>
-        </div>
-      `;
+        if (authenticityScore >= 80) {
+            authText = "[ STATUS: AUTHENTIC ]";
+            authClass = "auth-high";
+        } else {
+            authText = "[ STATUS: HESITATED / MASKED ]";
+            authClass = "auth-low";
+        }
+
+        document.getElementById('type-verdict').innerText = type;
+        document.getElementById('auth-status').innerText = authText;
+        document.getElementById('auth-status').className = authClass;
+        document.getElementById('logic-detail').innerText = 
+            (authenticityScore < 80) ? 
+            "ระบบตรวจพบความล่าช้าในการตอบสนอง คุณมีสิทธิ์ที่จะพยายามตอบตามความคาดหวัง หรือกำลังติด Loop บางอย่างที่ทำให้ตัวตนไม่เสถียร" :
+            "ตรรกะของคุณเสถียรมาก การตัดสินใจรวดเร็วบ่งบอกถึงการใช้ฟังก์ชันหลักจากสัญชาตญาณจริง";
     }
 
-    renderQuestion();
-  </script>
+    startTimer();
+</script>
 </body>
 </html>
